@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Purchase Orders — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Purchase Orders</h2>
+          <p>Generate, track and manage all purchase orders</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="exportPOs()">⬇ Export</button>
+          <button class="btn btn-primary" onclick="Modal.open('newPOModal')">+ Generate PO</button>
+        </div>
+      </div>
+
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic blue">📦</div><div class="sinfo"><div class="sval" id="totalPOs">—</div><div class="slbl">Total POs</div></div></div>
+        <div class="stat-card"><div class="sic green">✅</div><div class="sinfo"><div class="sval" id="deliveredPOs">—</div><div class="slbl">Delivered</div></div></div>
+        <div class="stat-card"><div class="sic cyan">🚚</div><div class="sinfo"><div class="sval" id="inTransitPOs">—</div><div class="slbl">In Transit</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏳</div><div class="sinfo"><div class="sval" id="pendingPOs">—</div><div class="slbl">Pending</div></div></div>
+      </div>
+
+      <div class="card fade-up d2">
+        <div class="card-header">
+          <div class="card-title">All Purchase Orders</div>
+          <div class="toolbar" style="margin:0">
+            <div class="search-bar" style="width:200px">
+              <span class="si">🔍</span>
+              <input class="form-control" id="poSearch" placeholder="Search POs…" oninput="filterTable('poSearch','poTable')"/>
+            </div>
+            <select class="fsel" onchange="filterPOs(this.value)" id="poStatusFilter">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="in_transit">In Transit</option>
+              <option value="delivered">Delivered</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="poTable">
+            <thead>
+              <tr>
+                <th>PO Number</th>
+                <th>PR Reference</th>
+                <th>Supplier</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Created</th>
+                <th>Delivery Date</th>
+                <th>Approved By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="poTableBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <span id="poCount" style="font-size:0.75rem;color:var(--text-muted)"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- New PO Modal -->
+<div class="modal-overlay" id="newPOModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">Generate Purchase Order</span>
+      <button class="modal-close" onclick="Modal.close('newPOModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="poForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Link to Requisition</label>
+            <select class="form-control" id="poReqId" required onchange="autoFill()">
+              <option value="">Select approved requisition…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Supplier</label>
+            <select class="form-control" id="poSupplier" required>
+              <option value="">Select supplier…</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Order Amount (RM)</label>
+            <input type="number" class="form-control" id="poAmount" min="0" step="0.01" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Expected Delivery Date</label>
+            <input type="date" class="form-control" id="poDelivery" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Terms & Conditions</label>
+          <textarea class="form-control" id="poTerms" placeholder="Standard payment and delivery terms apply. Goods must match specification."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shipping Address</label>
+          <input class="form-control" id="poAddress" value="ACME Corporation Sdn Bhd, Level 12, Menara KLCC, Kuala Lumpur 50450"/>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('newPOModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createPO()">Generate PO</button>
+    </div>
+  </div>
+</div>
+
+<!-- PO Detail Modal -->
+<div class="modal-overlay" id="poDetailModal">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <span class="modal-title" id="poDetailTitle">PO Detail</span>
+      <button class="modal-close" onclick="Modal.close('poDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="poDetailBody"></div>
+    <div class="modal-footer" id="poDetailFooter"></div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let allPOs = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('purchaseOrders', 'Purchase Orders', 'Purchase Orders');
+  if (!user) return;
+  loadPOs();
+  populateDropdowns();
+  document.getElementById('poDelivery').min = Util.today();
+});
+
+function loadPOs() {
+  allPOs = Store.getPOs();
+  renderPOs(allPOs);
+  updateStats(allPOs);
+}
+
+function updateStats(data) {
+  document.getElementById('totalPOs').textContent    = data.length;
+  document.getElementById('deliveredPOs').textContent= data.filter(p=>p.status==='delivered').length;
+  document.getElementById('inTransitPOs').textContent= data.filter(p=>p.status==='in_transit').length;
+  document.getElementById('pendingPOs').textContent  = data.filter(p=>p.status==='pending').length;
+  document.getElementById('poCount').textContent = `${data.length} purchase orders`;
+}
+
+function renderPOs(data) {
+  const tbody = document.getElementById('poTableBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📦</div><h4>No POs yet</h4></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(po => `
+    <tr>
+      <td class="td-mono">${po.id}</td>
+      <td class="td-mono" style="color:var(--text-muted)">${po.prId}</td>
+      <td class="td-primary">${po.supplier.length>25?po.supplier.substring(0,25)+'…':po.supplier}</td>
+      <td style="font-weight:500">${Util.formatCurrency(po.amount)}</td>
+      <td>${Badge.status(po.status)}</td>
+      <td>${Badge.status(po.payStatus)}</td>
+      <td>${Util.formatDate(po.created)}</td>
+      <td>${Util.formatDate(po.delivery)}</td>
+      <td>${po.approvedBy || '<span class="text-muted">—</span>'}</td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-secondary" onclick="toggleDropdown('podd-${po.id}')">⋯</button>
+          <div class="dropdown-menu" id="podd-${po.id}">
+            <div class="drop-item" onclick="viewPO('${po.id}')">👁 View</div>
+            <div class="drop-item" onclick="updatePOStatus('${po.id}')">🔄 Update Status</div>
+            <div class="drop-item" onclick="printPO('${po.id}')">🖨 Print PO</div>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterPOs(status) {
+  renderPOs(status ? allPOs.filter(p => p.status === status) : allPOs);
+}
+
+function populateDropdowns() {
+  const approvedReqs = Store.getRequisitions().filter(r => r.status === 'approved');
+  const reqSel = document.getElementById('poReqId');
+  approvedReqs.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.id} — ${r.title.substring(0,40)} (RM ${Util.formatNum(r.amount)})`;
+    opt._amount = r.amount;
+    reqSel.appendChild(opt);
+  });
+
+  const supSel = document.getElementById('poSupplier');
+  Store.getSuppliers().filter(s=>s.status==='active').forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name;
+    supSel.appendChild(opt);
+  });
+}
+
+function autoFill() {
+  const sel = document.getElementById('poReqId');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt && opt._amount) document.getElementById('poAmount').value = opt._amount;
+}
+
+function createPO() {
+  const reqId    = document.getElementById('poReqId').value;
+  const supId    = document.getElementById('poSupplier').value;
+  const amount   = parseFloat(document.getElementById('poAmount').value);
+  const delivery = document.getElementById('poDelivery').value;
+  if (!reqId||!supId||!amount||!delivery) { Toast.warning('Validation','Fill all required fields.'); return; }
+
+  const sup     = Store.getSuppliers().find(s=>s.id===supId);
+  const pos     = Store.getPOs();
+  const user    = Store.getUser();
+  const newPO   = {
+    id:         'PO-2025-' + String(pos.length + 100).padStart(4,'0'),
+    prId:       reqId,
+    supplier:   sup?.name || 'Unknown',
+    supId,
+    amount,
+    status:     'confirmed',
+    created:    Util.today(),
+    delivery,
+    approvedBy: user?.name,
+    payStatus:  'pending',
+  };
+  pos.unshift(newPO);
+  Store.savePOs(pos);
+  Modal.close('newPOModal');
+  Toast.success('PO Generated', `${newPO.id} created and sent to ${sup?.name}.`);
+  loadPOs();
+}
+
+function updatePOStatus(id) {
+  const pos = Store.getPOs();
+  const po  = pos.find(p=>p.id===id);
+  if (!po) return;
+  const nextStatus = { pending:'confirmed', confirmed:'in_transit', in_transit:'delivered' };
+  const next = nextStatus[po.status];
+  if (!next) { Toast.info('Info', 'PO is already delivered.'); return; }
+  po.status = next;
+  Store.savePOs(pos);
+  Toast.success('Status Updated', `${id} is now: ${next.replace('_',' ')}`);
+  loadPOs();
+}
+
+function viewPO(id) {
+  const po = allPOs.find(p=>p.id===id);
+  if (!po) return;
+  document.getElementById('poDetailTitle').textContent = po.id;
+  document.getElementById('poDetailBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div>
+        <div class="form-label">Status</div>${Badge.status(po.status)}
+        <div class="form-label" style="margin-top:10px">Payment Status</div>${Badge.status(po.payStatus)}
+        <div class="form-label" style="margin-top:10px">Supplier</div>
+        <div class="fw-500">${po.supplier}</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">${po.supId}</div>
+      </div>
+      <div>
+        <div class="form-label">Amount</div>
+        <div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${Util.formatCurrency(po.amount)}</div>
+        <div class="form-label" style="margin-top:10px">Created</div>${Util.formatDate(po.created)}
+        <div class="form-label" style="margin-top:10px">Delivery Date</div>${Util.formatDate(po.delivery)}
+      </div>
+    </div>
+    <div style="padding:14px;background:var(--bg);border-radius:8px">
+      <div class="form-label">Linked Requisition</div>
+      <div class="td-mono">${po.prId}</div>
+      <div class="form-label" style="margin-top:8px">Approved By</div>
+      <div>${po.approvedBy||'Pending approval'}</div>
+    </div>`;
+  document.getElementById('poDetailFooter').innerHTML = `
+    <button class="btn btn-secondary" onclick="Modal.close('poDetailModal')">Close</button>
+    <button class="btn btn-primary" onclick="updatePOStatus('${id}');Modal.close('poDetailModal')">Update Status</button>`;
+  Modal.open('poDetailModal');
+}
+
+function printPO(id) {
+  const po = allPOs.find(p=>p.id===id);
+  if (!po) return;
+  const win = window.open('','_blank');
+  win.document.write(`<html><head><title>${po.id}</title><style>body{font-family:sans-serif;padding:40px;color:#1e293b}h2{color:#2563eb}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #e2e8f0;padding:10px;text-align:left}th{background:#f1f5f9}.total{font-size:1.2rem;font-weight:700;color:#2563eb}</style></head><body>
+    <h2>Purchase Order — ${po.id}</h2>
+    <p><strong>Supplier:</strong> ${po.supplier}</p>
+    <p><strong>Status:</strong> ${po.status}</p>
+    <p><strong>Created:</strong> ${Util.formatDate(po.created)}</p>
+    <p><strong>Delivery Date:</strong> ${Util.formatDate(po.delivery)}</p>
+    <p><strong>Approved By:</strong> ${po.approvedBy||'—'}</p>
+    <p class="total">Total Amount: ${Util.formatCurrency(po.amount)}</p>
+    <p style="margin-top:40px;color:#94a3b8;font-size:12px">ACME Corporation Sdn Bhd · P2P Solutions System · Generated ${new Date().toLocaleString()}</p>
+    </body></html>`);
+  win.print();
+}
+
+function exportPOs() {
+  const h = 'ID,PR,Supplier,Amount,Status,Payment,Created,Delivery\n';
+  const r = allPOs.map(p=>`${p.id},${p.prId},"${p.supplier}",${p.amount},${p.status},${p.payStatus},${p.created},${p.delivery}`).join('\n');
+  const b = new Blob([h+r],{type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='purchase-orders.csv'; a.click();
+  Toast.success('Exported','Purchase orders downloaded');
+}
+</script>
+</body>
+</html>

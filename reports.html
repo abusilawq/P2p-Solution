@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports &amp; Analytics — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Reports &amp; Analytics</h2>
+          <p>Spending insights, supplier performance and procurement trends</p>
+        </div>
+        <div class="page-header-actions">
+          <select class="fsel" id="periodFilter" onchange="renderReports()">
+            <option value="ytd">Year to date</option>
+            <option value="q2">Q2 2025</option>
+            <option value="q1">Q1 2025</option>
+            <option value="last90">Last 90 days</option>
+            <option value="last30">Last 30 days</option>
+          </select>
+          <button class="btn btn-secondary" onclick="downloadReport('csv')">⬇ CSV</button>
+          <button class="btn btn-primary" onclick="downloadReport('pdf')">📄 Download Report</button>
+        </div>
+      </div>
+
+      <!-- KPI Summary -->
+      <div class="stats-grid fade-up d1">
+        <div class="stat-card"><div class="sic blue">💰</div><div class="sinfo"><div class="sval" id="kpiSpend">—</div><div class="slbl">Total Spend</div><div class="schg up">▲ 12.4% vs prev period</div></div></div>
+        <div class="stat-card"><div class="sic green">📦</div><div class="sinfo"><div class="sval" id="kpiPOs">—</div><div class="slbl">Purchase Orders</div><div class="schg up">▲ 8.1%</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏱</div><div class="sinfo"><div class="sval" id="kpiCycle">—</div><div class="slbl">Avg. Cycle Time (days)</div><div class="schg down">▼ 2.3 days saved</div></div></div>
+        <div class="stat-card"><div class="sic purple">🤝</div><div class="sinfo"><div class="sval" id="kpiSuppliers">—</div><div class="slbl">Active Suppliers</div><div class="schg up">▲ 3 new</div></div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs fade-up d2">
+        <button class="tab-btn active" data-tab="spend">Spending Analysis</button>
+        <button class="tab-btn" data-tab="supplier">Supplier Performance</button>
+        <button class="tab-btn" data-tab="cycle">Cycle Time</button>
+        <button class="tab-btn" data-tab="compliance">Compliance</button>
+      </div>
+
+      <!-- === SPENDING ANALYSIS === -->
+      <div id="tab-spend" class="tab-pane active">
+        <div class="grid-2 fade-up d3">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Monthly Spend Trend</div>
+                <div class="card-subtitle">All categories combined</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap tall"><canvas id="spendTrendChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Spend by Category</div>
+                <div class="card-subtitle">Distribution across procurement types</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap tall"><canvas id="categoryPieChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fade-up d4 mt-16">
+          <div class="card-header">
+            <div class="card-title">Top Spending Categories</div>
+            <span class="text-xs text-muted">Click a row to drill down</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr>
+                <th>Category</th><th>Orders</th><th>Total Spend</th><th>% of Budget</th><th>Trend</th><th>Status</th>
+              </tr></thead>
+              <tbody id="categoryTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- === SUPPLIER PERFORMANCE === -->
+      <div id="tab-supplier" class="tab-pane">
+        <div class="card fade-up">
+          <div class="card-header">
+            <div class="card-title">Supplier Scorecard</div>
+            <span class="text-xs text-muted">Performance across delivery, quality and value</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap tall"><canvas id="supplierRadarChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card fade-up d2 mt-16">
+          <div class="card-header"><div class="card-title">Top Performing Suppliers</div></div>
+          <div class="table-container">
+            <table>
+              <thead><tr>
+                <th>Supplier</th><th>Orders</th><th>Total Value</th><th>On-Time %</th><th>Quality</th><th>Score</th><th>Rating</th>
+              </tr></thead>
+              <tbody id="supplierPerfTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- === CYCLE TIME === -->
+      <div id="tab-cycle" class="tab-pane">
+        <div class="card fade-up">
+          <div class="card-header">
+            <div class="card-title">Procurement Cycle Time Breakdown</div>
+            <span class="text-xs text-muted">Average days per stage</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap tall"><canvas id="cycleBarChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="grid-3 fade-up d2 mt-16">
+          <div class="card">
+            <div class="card-body text-center">
+              <div class="sval" style="color:var(--success)">94%</div>
+              <div class="slbl">Approval SLA Met</div>
+              <div class="progress mt-8"><div class="progress-bar success" style="width:94%"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body text-center">
+              <div class="sval" style="color:var(--accent)">88%</div>
+              <div class="slbl">On-Time Delivery</div>
+              <div class="progress mt-8"><div class="progress-bar" style="width:88%"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body text-center">
+              <div class="sval" style="color:var(--warning)">76%</div>
+              <div class="slbl">Invoice Auto-Match</div>
+              <div class="progress mt-8"><div class="progress-bar warning" style="width:76%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === COMPLIANCE === -->
+      <div id="tab-compliance" class="tab-pane">
+        <div class="grid-2 fade-up">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Policy Compliance Overview</div></div>
+            <div class="card-body">
+              <div class="chart-wrap"><canvas id="complianceChart"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Audit Trail Highlights</div></div>
+            <div class="card-body">
+              <div class="timeline">
+                <div class="tl-item"><div class="tl-dot" style="background:var(--success-light);color:var(--success)">✓</div><div class="tl-content"><div class="tl-title">All POs approved within SLA</div><div class="tl-time">This quarter — 31 of 33 approved</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--warning-light);color:var(--warning)">!</div><div class="tl-content"><div class="tl-title">2 invoices flagged for mismatch</div><div class="tl-time">Auto-resolved 1 · 1 pending dispute</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--accent-light);color:var(--accent)">i</div><div class="tl-content"><div class="tl-title">Single-source spend within limits</div><div class="tl-time">Top supplier &lt; 18% of total spend</div></div></div>
+                <div class="tl-item"><div class="tl-dot" style="background:var(--success-light);color:var(--success)">✓</div><div class="tl-content"><div class="tl-title">All suppliers tax-verified</div><div class="tl-time">8 of 8 active suppliers compliant</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+const user = initPage('reports', 'Reports & Analytics', ['Home', 'Reports']);
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    // Re-flow charts when becoming visible
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+  });
+});
+
+const allInvoices = Store.getInvoices();
+const allPOs = Store.getPOs();
+const allSuppliers = Store.getSuppliers();
+
+function renderKPIs() {
+  const totalSpend = allInvoices.reduce((s,i) => s + i.total, 0);
+  document.getElementById('kpiSpend').textContent = Util.formatCurrency(totalSpend).replace('RM ','RM ');
+  document.getElementById('kpiPOs').textContent = allPOs.length;
+  document.getElementById('kpiCycle').textContent = '4.8';
+  document.getElementById('kpiSuppliers').textContent = allSuppliers.filter(s=>s.status==='active').length;
+}
+
+let charts = {};
+function destroyCharts() { Object.values(charts).forEach(c => c && c.destroy()); charts = {}; }
+
+function renderCharts() {
+  destroyCharts();
+  chartDefaults();
+
+  // Monthly spend trend
+  charts.trend = new Chart(document.getElementById('spendTrendChart'), {
+    type: 'line',
+    data: {
+      labels: P2PData.monthlySpend.labels,
+      datasets: [{
+        label: 'Spend (RM)',
+        data: P2PData.monthlySpend.data,
+        borderColor: '#2563EB',
+        backgroundColor: 'rgba(37,99,235,0.1)',
+        borderWidth: 2.5,
+        tension: 0.35,
+        fill: true,
+        pointBackgroundColor: '#2563EB',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => 'RM ' + (v/1000) + 'k' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Category pie
+  charts.pie = new Chart(document.getElementById('categoryPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: P2PData.categorySpend.labels,
+      datasets: [{
+        data: P2PData.categorySpend.data,
+        backgroundColor: ['#2563EB','#10B981','#F59E0B','#06B6D4','#8B5CF6','#EF4444'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
+      plugins: { legend: { position: 'right' } }
+    }
+  });
+
+  // Supplier radar
+  const sp = P2PData.supplierPerformance;
+  charts.radar = new Chart(document.getElementById('supplierRadarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['Delivery', 'Quality', 'Value', 'Compliance', 'Communication'],
+      datasets: sp.slice(0, 3).map((s, i) => ({
+        label: s.name,
+        data: [s.delivery, s.quality, s.value, s.score - 2, s.score - 5],
+        borderColor: ['#2563EB','#10B981','#F59E0B'][i],
+        backgroundColor: ['rgba(37,99,235,0.12)','rgba(16,185,129,0.12)','rgba(245,158,11,0.12)'][i],
+        borderWidth: 2,
+        pointRadius: 3
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: { beginAtZero: false, min: 70, max: 100, ticks: { stepSize: 10 } } }
+    }
+  });
+
+  // Cycle bar
+  charts.cycle = new Chart(document.getElementById('cycleBarChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Requisition', 'Approval', 'Sourcing', 'PO Issuance', 'Delivery', 'Invoice Match', 'Payment'],
+      datasets: [
+        { label: 'Manual (Industry Avg)', data: [2, 4.5, 3, 2, 5, 4, 6], backgroundColor: '#E2E8F0' },
+        { label: 'Automated (P2P System)', data: [0.5, 1.2, 1.5, 0.3, 4, 0.8, 2], backgroundColor: '#2563EB' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => v + ' d' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Compliance
+  charts.compliance = new Chart(document.getElementById('complianceChart'), {
+    type: 'bar',
+    data: {
+      labels: ['PR Policy', 'PO Approval', 'Vendor Screening', '3-Way Match', 'Payment Terms'],
+      datasets: [{
+        label: 'Compliance %',
+        data: [98, 94, 100, 87, 96],
+        backgroundColor: ['#10B981','#10B981','#10B981','#F59E0B','#10B981'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 100, grid: { color: '#F1F5F9' }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderCategoryTable() {
+  const rows = [
+    { cat: 'IT Hardware',     orders: 18, spend: 215400, pct: 35, trend: '▲ 12%', tcolor: 'up' },
+    { cat: 'Cloud & SaaS',    orders: 12, spend: 132000, pct: 22, trend: '▲ 18%', tcolor: 'up' },
+    { cat: 'Logistics',       orders: 22, spend:  108000, pct: 18, trend: '▼ 4%',  tcolor: 'down' },
+    { cat: 'Office Supplies', orders: 34, spend:   58200, pct: 10, trend: '— stable', tcolor: '' },
+    { cat: 'Equipment',       orders:  7, spend:   53400, pct:  9, trend: '▲ 5%',  tcolor: 'up' },
+    { cat: 'Other',           orders: 11, spend:   35900, pct:  6, trend: '▼ 2%',  tcolor: 'down' },
+  ];
+  document.getElementById('categoryTbody').innerHTML = rows.map(r => `
+    <tr>
+      <td class="td-primary">${r.cat}</td>
+      <td>${r.orders}</td>
+      <td>${Util.formatCurrency(r.spend)}</td>
+      <td>
+        <div class="d-flex align-center gap-8">
+          <div class="progress" style="flex:1;max-width:120px"><div class="progress-bar" style="width:${r.pct*2}%"></div></div>
+          <span class="text-xs fw-600">${r.pct}%</span>
+        </div>
+      </td>
+      <td><span class="text-xs" style="color:${r.tcolor==='up'?'var(--success)':r.tcolor==='down'?'var(--danger)':'var(--text-muted)'}">${r.trend}</span></td>
+      <td><span class="badge ${r.pct < 20 ? 'badge-success' : r.pct < 35 ? 'badge-warning' : 'badge-info'}">${r.pct < 20 ? 'On Budget' : r.pct < 35 ? 'Watch' : 'High'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderSupplierTable() {
+  const sp = P2PData.supplierPerformance;
+  const supDetails = Store.getSuppliers();
+  document.getElementById('supplierPerfTbody').innerHTML = sp.map((s, i) => {
+    const m = supDetails.find(x => s.name.includes(x.name.split(' ')[0])) || { totalOrders: 20, totalValue: 100000, rating: 4.5 };
+    return `
+      <tr>
+        <td class="td-primary">${s.name}</td>
+        <td>${m.totalOrders || 25}</td>
+        <td>${Util.formatCurrency(m.totalValue || 150000)}</td>
+        <td>
+          <div class="d-flex align-center gap-8">
+            <div class="progress" style="flex:1;max-width:80px"><div class="progress-bar success" style="width:${s.delivery}%"></div></div>
+            <span class="text-xs">${s.delivery}%</span>
+          </div>
+        </td>
+        <td><span class="text-xs">${s.quality}%</span></td>
+        <td>
+          <span class="fw-600" style="color:${s.score >= 95 ? 'var(--success)' : s.score >= 90 ? 'var(--accent)' : 'var(--warning)'}">${s.score}</span>
+        </td>
+        <td><span class="badge ${s.score >= 95 ? 'badge-success' : s.score >= 90 ? 'badge-primary' : 'badge-warning'}">${s.score >= 95 ? '⭐ Preferred' : s.score >= 90 ? 'Approved' : 'Review'}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderReports() {
+  Toast.info('Period updated', 'Reports refreshed for selected period');
+  setTimeout(() => renderCharts(), 200);
+}
+
+function downloadReport(format) {
+  if (format === 'csv') {
+    let csv = 'P2P Procurement Report\n\n';
+    csv += 'KPI,Value\n';
+    csv += `Total Spend,${allInvoices.reduce((s,i)=>s+i.total,0)}\n`;
+    csv += `Purchase Orders,${allPOs.length}\n`;
+    csv += `Active Suppliers,${allSuppliers.filter(s=>s.status==='active').length}\n\n`;
+    csv += 'Category,Orders,Spend\n';
+    P2PData.categorySpend.labels.forEach((l, i) => csv += `${l},${P2PData.categorySpend.data[i]},${P2PData.categorySpend.data[i] * 1000}\n`);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'p2p-report-' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+    Toast.success('Downloaded', 'CSV report exported');
+  } else {
+    const w = window.open('', '', 'width=900,height=700');
+    w.document.write(`<!DOCTYPE html><html><head><title>P2P Report</title><style>
+      body{font-family:'Segoe UI',sans-serif;padding:40px;color:#0F172A;max-width:800px;margin:auto}
+      h1{color:#2563EB;border-bottom:3px solid #2563EB;padding-bottom:12px}
+      .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:20px 0}
+      .kpi{padding:16px;background:#F1F5F9;border-radius:8px}
+      .kpi-val{font-size:1.8rem;font-weight:700;color:#2563EB}
+      .kpi-lbl{font-size:0.85rem;color:#64748B}
+      table{width:100%;border-collapse:collapse;margin-top:20px}
+      th,td{padding:10px;text-align:left;border-bottom:1px solid #E2E8F0}
+      th{background:#F1F5F9;font-size:0.75rem;text-transform:uppercase}
+      .footer{margin-top:40px;padding-top:20px;border-top:1px solid #E2E8F0;color:#94A3B8;font-size:0.8rem;text-align:center}
+    </style></head><body>
+    <h1>P2P Procurement Analytics Report</h1>
+    <p>Period: Year to Date · Generated ${new Date().toLocaleString()}</p>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-val">${Util.formatCurrency(allInvoices.reduce((s,i)=>s+i.total,0))}</div><div class="kpi-lbl">Total Procurement Spend</div></div>
+      <div class="kpi"><div class="kpi-val">${allPOs.length}</div><div class="kpi-lbl">Purchase Orders Issued</div></div>
+      <div class="kpi"><div class="kpi-val">${allSuppliers.filter(s=>s.status==='active').length}</div><div class="kpi-lbl">Active Suppliers</div></div>
+      <div class="kpi"><div class="kpi-val">4.8 days</div><div class="kpi-lbl">Average Cycle Time</div></div>
+    </div>
+    <h2>Spending by Category</h2>
+    <table><thead><tr><th>Category</th><th>% Share</th></tr></thead><tbody>
+    ${P2PData.categorySpend.labels.map((l, i) => `<tr><td>${l}</td><td>${P2PData.categorySpend.data[i]}%</td></tr>`).join('')}
+    </tbody></table>
+    <h2>Top Performing Suppliers</h2>
+    <table><thead><tr><th>Supplier</th><th>Score</th><th>Rating</th></tr></thead><tbody>
+    ${P2PData.supplierPerformance.map(s => `<tr><td>${s.name}</td><td>${s.score}</td><td>${s.score >= 95 ? 'Preferred' : 'Approved'}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="footer">ACME Corporation Sdn Bhd · P2P Solutions Enterprise Platform · Confidential</div>
+    </body></html>`);
+    w.print();
+    Toast.success('Report Ready', 'PDF report generated');
+  }
+}
+
+renderKPIs();
+renderCategoryTable();
+renderSupplierTable();
+renderCharts();
+</script>
+</body>
+</html>

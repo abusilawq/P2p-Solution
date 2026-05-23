@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suppliers — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Supplier Management</h2>
+          <p>Manage approved vendors, track performance and contracts</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="exportSuppliers()">⬇ Export</button>
+          <button class="btn btn-primary" onclick="openAddSupplier()">+ Add Supplier</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic green">🏢</div><div class="sinfo"><div class="sval" id="totalSup">—</div><div class="slbl">Total Suppliers</div></div></div>
+        <div class="stat-card"><div class="sic blue">✅</div><div class="sinfo"><div class="sval" id="activeSup">—</div><div class="slbl">Active</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏳</div><div class="sinfo"><div class="sval" id="pendingSup">—</div><div class="slbl">Pending Approval</div></div></div>
+        <div class="stat-card"><div class="sic purple">⭐</div><div class="sinfo"><div class="sval" id="avgRating">—</div><div class="slbl">Avg Rating</div></div></div>
+      </div>
+
+      <!-- Toolbar + Table -->
+      <div class="card fade-up d2">
+        <div class="card-header">
+          <div class="card-title">All Suppliers</div>
+          <div class="toolbar" style="margin:0">
+            <div class="search-bar" style="width:220px">
+              <span class="si">🔍</span>
+              <input class="form-control" id="supSearch" placeholder="Search suppliers…" oninput="filterTable('supSearch','supTable')"/>
+            </div>
+            <select class="fsel" onchange="filterSuppliers(this.value,'category')" id="catFilter">
+              <option value="">All Categories</option>
+              <option>IT Hardware</option><option>Cloud & SaaS</option><option>Office Supplies</option>
+              <option>Equipment</option><option>Logistics</option><option>Printing</option>
+              <option>Medical</option><option>Security</option>
+            </select>
+            <select class="fsel" onchange="filterSuppliers(this.value,'status')" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="supTable">
+            <thead>
+              <tr>
+                <th>Supplier</th>
+                <th>Contact</th>
+                <th>Category</th>
+                <th>Country</th>
+                <th>Payment Terms</th>
+                <th>Rating</th>
+                <th>Total Orders</th>
+                <th>Total Value</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="supTableBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer">
+          <span id="supCount" style="font-size:0.75rem;color:var(--text-muted)"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD/EDIT SUPPLIER MODAL ── -->
+<div class="modal-overlay" id="supplierModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="supModalTitle">Add New Supplier</span>
+      <button class="modal-close" onclick="Modal.close('supplierModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="supForm">
+        <input type="hidden" id="supId"/>
+        <div class="tabs">
+          <button type="button" class="tab-btn active" onclick="switchTab(this,'supTab1')">Company Info</button>
+          <button type="button" class="tab-btn" onclick="switchTab(this,'supTab2')">Financial</button>
+          <button type="button" class="tab-btn" onclick="switchTab(this,'supTab3')">Classification</button>
+        </div>
+
+        <div class="tab-pane active" id="supTab1">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label req">Company Name</label>
+              <input class="form-control" id="supName" placeholder="Full legal company name" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Category</label>
+              <select class="form-control" id="supCat" required>
+                <option value="">Select…</option>
+                <option>IT Hardware</option><option>Cloud & SaaS</option><option>Office Supplies</option>
+                <option>Equipment</option><option>Logistics</option><option>Printing</option>
+                <option>Medical</option><option>Security</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label req">Contact Person</label>
+              <input class="form-control" id="supContact" placeholder="Full name" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Email</label>
+              <input type="email" class="form-control" id="supEmail" placeholder="contact@company.com" required/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input class="form-control" id="supPhone" placeholder="+60 3-xxxx xxxx"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Country</label>
+              <select class="form-control" id="supCountry" required>
+                <option value="">Select…</option>
+                <option>Malaysia</option><option>Singapore</option><option>Indonesia</option>
+                <option>Thailand</option><option>India</option><option>China</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-control" id="supCity" placeholder="City"/>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="supTab2">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tax ID / SST No.</label>
+              <input class="form-control" id="supTaxId" placeholder="MY-XX-XXXXX"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Payment Terms</label>
+              <select class="form-control" id="supPayment" required>
+                <option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Immediate</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="supTab3">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" id="supStatus">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending Approval</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Performance Rating (1–5)</label>
+              <input type="number" class="form-control" id="supRating" min="1" max="5" step="0.1" value="4.0"/>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('supplierModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DETAIL VIEW MODAL ── -->
+<div class="modal-overlay" id="supDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="supDetailTitle">Supplier Details</span>
+      <button class="modal-close" onclick="Modal.close('supDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="supDetailBody"></div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let suppliers = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('suppliers', 'Supplier Management', 'Suppliers');
+  if (!user) return;
+  loadSuppliers();
+});
+
+function loadSuppliers() {
+  suppliers = Store.getSuppliers();
+  renderSuppliers(suppliers);
+  updateStats(suppliers);
+}
+
+function updateStats(data) {
+  document.getElementById('totalSup').textContent  = data.length;
+  document.getElementById('activeSup').textContent = data.filter(s=>s.status==='active').length;
+  document.getElementById('pendingSup').textContent= data.filter(s=>s.status==='pending').length;
+  const avg = data.reduce((a,s)=>a+s.rating,0)/data.length;
+  document.getElementById('avgRating').textContent = avg.toFixed(1) + '⭐';
+  document.getElementById('supCount').textContent = `${data.length} suppliers`;
+}
+
+function ratingStars(r) {
+  const full = Math.round(r);
+  return '★'.repeat(full) + '☆'.repeat(5-full) + ` <span style="font-size:0.72rem;color:var(--text-muted)">(${r})</span>`;
+}
+
+function renderSuppliers(data) {
+  const tbody = document.getElementById('supTableBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🏢</div><h4>No suppliers found</h4></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td>
+        <div class="td-primary">${s.name}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted)">${s.id}</div>
+      </td>
+      <td>
+        <div>${s.contact}</div>
+        <div style="font-size:0.7rem;color:var(--accent)">${s.email}</div>
+      </td>
+      <td><span class="badge badge-info">${s.category}</span></td>
+      <td>${s.city ? s.city+', ':''} ${s.country}</td>
+      <td>${s.payment}</td>
+      <td style="color:#F59E0B;font-weight:600">${ratingStars(s.rating)}</td>
+      <td style="text-align:center">${s.totalOrders}</td>
+      <td>${Util.formatCurrency(s.totalValue)}</td>
+      <td>${Badge.status(s.status)}</td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-secondary" onclick="toggleDropdown('sdd-${s.id}')">⋯</button>
+          <div class="dropdown-menu" id="sdd-${s.id}">
+            <div class="drop-item" onclick="viewSupplier('${s.id}')">👁 View</div>
+            <div class="drop-item" onclick="editSupplier('${s.id}')">✏ Edit</div>
+            <div class="drop-divider"></div>
+            <div class="drop-item danger" onclick="deleteSupplier('${s.id}')">🗑 Delete</div>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterSuppliers(val, key) {
+  let data = Store.getSuppliers();
+  const cat    = document.getElementById('catFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  if (cat)    data = data.filter(s => s.category === cat);
+  if (status) data = data.filter(s => s.status === status);
+  renderSuppliers(data);
+}
+
+function openAddSupplier() {
+  document.getElementById('supModalTitle').textContent = 'Add New Supplier';
+  document.getElementById('supForm').reset();
+  document.getElementById('supId').value = '';
+  Modal.open('supplierModal');
+}
+
+function editSupplier(id) {
+  const s = suppliers.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('supModalTitle').textContent = 'Edit Supplier — ' + s.name;
+  document.getElementById('supId').value      = s.id;
+  document.getElementById('supName').value    = s.name;
+  document.getElementById('supContact').value = s.contact;
+  document.getElementById('supEmail').value   = s.email;
+  document.getElementById('supPhone').value   = s.phone || '';
+  document.getElementById('supCity').value    = s.city || '';
+  document.getElementById('supTaxId').value   = s.taxId || '';
+  document.getElementById('supRating').value  = s.rating;
+  document.getElementById('supCat').value     = s.category;
+  document.getElementById('supCountry').value = s.country;
+  document.getElementById('supPayment').value = s.payment;
+  document.getElementById('supStatus').value  = s.status;
+  Modal.open('supplierModal');
+}
+
+function saveSupplier() {
+  const name    = document.getElementById('supName').value.trim();
+  const contact = document.getElementById('supContact').value.trim();
+  const email   = document.getElementById('supEmail').value.trim();
+  const cat     = document.getElementById('supCat').value;
+  const country = document.getElementById('supCountry').value;
+  if (!name || !contact || !email || !cat || !country) { Toast.warning('Validation','Fill in all required fields.'); return; }
+
+  const list = Store.getSuppliers();
+  const id   = document.getElementById('supId').value;
+
+  const supData = {
+    id:          id || ('SUP-' + String(list.length+1).padStart(3,'0')),
+    name, contact, email,
+    phone:       document.getElementById('supPhone').value,
+    city:        document.getElementById('supCity').value,
+    country,
+    category:    cat,
+    taxId:       document.getElementById('supTaxId').value,
+    payment:     document.getElementById('supPayment').value,
+    status:      document.getElementById('supStatus').value,
+    rating:      parseFloat(document.getElementById('supRating').value) || 4.0,
+    totalOrders: 0, totalValue: 0,
+    joined:      Util.today(),
+  };
+
+  if (id) {
+    const idx = list.findIndex(s => s.id === id);
+    if (idx >= 0) { supData.totalOrders = list[idx].totalOrders; supData.totalValue = list[idx].totalValue; list[idx] = supData; }
+    Toast.success('Updated', supData.name + ' updated.');
+  } else {
+    list.push(supData);
+    Toast.success('Added', supData.name + ' added to supplier list.');
+  }
+
+  Store.saveSuppliers(list);
+  Modal.close('supplierModal');
+  loadSuppliers();
+}
+
+function deleteSupplier(id) {
+  if (!confirm('Remove this supplier?')) return;
+  const list = Store.getSuppliers().filter(s => s.id !== id);
+  Store.saveSuppliers(list);
+  Toast.info('Removed', 'Supplier has been removed.');
+  loadSuppliers();
+}
+
+function viewSupplier(id) {
+  const s = suppliers.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('supDetailTitle').textContent = s.name;
+  document.getElementById('supDetailBody').innerHTML = `
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px">
+      <div style="width:52px;height:52px;border-radius:12px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏢</div>
+      <div>
+        <div class="fw-600" style="font-size:1.05rem">${s.name}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">${s.id} · ${s.category}</div>
+        <div style="margin-top:4px">${Badge.status(s.status)}</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><div class="form-label">Contact</div><div class="fw-500">${s.contact}</div></div>
+      <div><div class="form-label">Email</div><a href="mailto:${s.email}" style="color:var(--accent)">${s.email}</a></div>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div><div class="form-label">Phone</div>${s.phone||'—'}</div>
+      <div><div class="form-label">Location</div>${s.city?s.city+', ':''}${s.country}</div>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div><div class="form-label">Payment Terms</div><span class="badge badge-info">${s.payment}</span></div>
+      <div><div class="form-label">Tax ID</div>${s.taxId||'—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;padding:14px;background:var(--bg);border-radius:8px;text-align:center">
+      <div><div style="font-size:1.3rem;font-weight:700;color:var(--accent)">${s.totalOrders}</div><div style="font-size:0.7rem;color:var(--text-muted)">Total Orders</div></div>
+      <div><div style="font-size:1.3rem;font-weight:700;color:var(--success)">${Util.formatCurrency(s.totalValue)}</div><div style="font-size:0.7rem;color:var(--text-muted)">Total Value</div></div>
+      <div><div style="font-size:1.3rem;font-weight:700;color:#F59E0B">${s.rating}★</div><div style="font-size:0.7rem;color:var(--text-muted)">Rating</div></div>
+    </div>`;
+  Modal.open('supDetailModal');
+}
+
+function exportSuppliers() {
+  const headers = 'ID,Name,Contact,Email,Category,Country,Payment,Rating,Status\n';
+  const rows = suppliers.map(s=>`${s.id},"${s.name}","${s.contact}",${s.email},${s.category},${s.country},${s.payment},${s.rating},${s.status}`).join('\n');
+  const blob = new Blob([headers+rows],{type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='suppliers.csv'; a.click();
+  Toast.success('Exported','Supplier list downloaded');
+}
+</script>
+</body>
+</html>

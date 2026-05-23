@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Admin Panel</h2>
+          <p>Manage users, approval workflows and system configuration</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="resetDemoData()">⟳ Reset Demo Data</button>
+          <button class="btn btn-primary" onclick="Modal.open('newUserModal')">+ Add User</button>
+        </div>
+      </div>
+
+      <!-- System Stats -->
+      <div class="stats-grid fade-up d1">
+        <div class="stat-card"><div class="sic blue">👥</div><div class="sinfo"><div class="sval" id="statUsers">—</div><div class="slbl">Total Users</div></div></div>
+        <div class="stat-card"><div class="sic green">✓</div><div class="sinfo"><div class="sval">99.9%</div><div class="slbl">System Uptime</div></div></div>
+        <div class="stat-card"><div class="sic amber">⚙</div><div class="sinfo"><div class="sval" id="statRules">—</div><div class="slbl">Approval Rules</div></div></div>
+        <div class="stat-card"><div class="sic purple">🔐</div><div class="sinfo"><div class="sval">256-bit</div><div class="slbl">AES Encryption</div></div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs fade-up d2">
+        <button class="tab-btn active" data-tab="users">User Management</button>
+        <button class="tab-btn" data-tab="workflows">Approval Workflows</button>
+        <button class="tab-btn" data-tab="settings">System Settings</button>
+        <button class="tab-btn" data-tab="audit">Audit Log</button>
+      </div>
+
+      <!-- === USER MANAGEMENT === -->
+      <div id="tab-users" class="tab-pane active">
+        <div class="card fade-up">
+          <div class="card-header">
+            <div>
+              <div class="card-title">System Users</div>
+              <div class="card-subtitle">Manage user accounts, roles and permissions</div>
+            </div>
+            <div class="search-bar" style="width:240px">
+              <span class="si">🔍</span>
+              <input type="text" class="form-control" placeholder="Search users..." oninput="filterUsers(this.value)"/>
+            </div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr>
+                <th>User</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Last Login</th><th></th>
+              </tr></thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- === APPROVAL WORKFLOWS === -->
+      <div id="tab-workflows" class="tab-pane">
+        <div class="card fade-up">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Approval Threshold Rules</div>
+              <div class="card-subtitle">Automatic routing based on purchase amount</div>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="Toast.info('Edit Mode','Feature available in production')">✎ Edit Rules</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr>
+                <th>Tier</th><th>Amount Range</th><th>Approver Role</th><th>SLA</th><th>Auto-Escalation</th>
+              </tr></thead>
+              <tbody id="rulesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2 fade-up d2 mt-16">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Workflow Settings</div></div>
+            <div class="card-body">
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div>
+                  <div class="fw-600 text-sm">Auto-approve under RM 500</div>
+                  <div class="text-xs text-muted">Low-value purchases skip approval</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div>
+                  <div class="fw-600 text-sm">3-Way Invoice Matching</div>
+                  <div class="text-xs text-muted">Match PO + Receipt + Invoice</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div>
+                  <div class="fw-600 text-sm">Email Notifications</div>
+                  <div class="text-xs text-muted">Notify approvers via email</div>
+                </div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between mb-0">
+                <div>
+                  <div class="fw-600 text-sm">Escalate After 48h</div>
+                  <div class="text-xs text-muted">Auto-escalate stale approvals</div>
+                </div>
+                <label class="switch"><input type="checkbox"/></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Approval Flow Diagram</div></div>
+            <div class="card-body">
+              <div class="wf-steps">
+                <div class="wf-step done"><div class="wf-dot">1</div><div class="wf-lbl">Request</div></div>
+                <div class="wf-step done"><div class="wf-dot">2</div><div class="wf-lbl">Dept. Review</div></div>
+                <div class="wf-step curr"><div class="wf-dot">3</div><div class="wf-lbl">Finance</div></div>
+                <div class="wf-step"><div class="wf-dot">4</div><div class="wf-lbl">Director</div></div>
+                <div class="wf-step"><div class="wf-dot">5</div><div class="wf-lbl">PO Issue</div></div>
+              </div>
+              <p class="text-xs text-muted text-center mt-16">Standard approval chain for purchases between RM 5,001 – RM 25,000.<br/>Configurable based on department, category and amount.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === SYSTEM SETTINGS === -->
+      <div id="tab-settings" class="tab-pane">
+        <div class="grid-2 fade-up">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Organization Profile</div></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Company Name</label>
+                <input class="form-control" value="ACME Corporation Sdn Bhd"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Registration No.</label>
+                <input class="form-control" value="201801023456 (1289345-X)"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tax ID / GST</label>
+                <input class="form-control" value="MY-001234567890"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Default Currency</label>
+                <select class="form-control">
+                  <option>MYR — Malaysian Ringgit</option>
+                  <option>USD — US Dollar</option>
+                  <option>SGD — Singapore Dollar</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="Toast.success('Saved','Settings updated')">Save Changes</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Security &amp; Access</div></div>
+            <div class="card-body">
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div><div class="fw-600 text-sm">Two-Factor Authentication</div><div class="text-xs text-muted">Required for admin accounts</div></div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div><div class="fw-600 text-sm">Session Timeout (30 min)</div><div class="text-xs text-muted">Auto logout on inactivity</div></div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between" style="margin-bottom:14px">
+                <div><div class="fw-600 text-sm">Password Complexity</div><div class="text-xs text-muted">Min. 8 chars, mixed case + digits</div></div>
+                <label class="switch"><input type="checkbox" checked/></label>
+              </div>
+              <div class="form-group d-flex align-center justify-between mb-0">
+                <div><div class="fw-600 text-sm">IP Whitelist</div><div class="text-xs text-muted">Restrict access by IP</div></div>
+                <label class="switch"><input type="checkbox"/></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-3 fade-up d2 mt-16">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Email Templates</div></div>
+            <div class="card-body">
+              <div class="text-xs text-muted mb-8">Configure notification emails</div>
+              <button class="btn btn-sm btn-secondary w-100 mb-8" onclick="Toast.info('Template','PR submission email')">📧 PR Submission</button>
+              <button class="btn btn-sm btn-secondary w-100 mb-8" onclick="Toast.info('Template','Approval pending email')">📧 Approval Pending</button>
+              <button class="btn btn-sm btn-secondary w-100" onclick="Toast.info('Template','Payment confirmation email')">📧 Payment Confirmation</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Integrations</div></div>
+            <div class="card-body">
+              <div class="d-flex align-center justify-between mb-12"><span class="text-sm">SAP ERP</span><span class="badge badge-success">Connected</span></div>
+              <div class="d-flex align-center justify-between mb-12"><span class="text-sm">QuickBooks</span><span class="badge badge-neutral">Not Connected</span></div>
+              <div class="d-flex align-center justify-between mb-12"><span class="text-sm">Slack Notifications</span><span class="badge badge-success">Connected</span></div>
+              <div class="d-flex align-center justify-between"><span class="text-sm">Microsoft Teams</span><span class="badge badge-neutral">Not Connected</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Data &amp; Backup</div></div>
+            <div class="card-body">
+              <div class="text-xs text-muted mb-8">Last backup: <strong>2 hours ago</strong></div>
+              <div class="progress mb-8"><div class="progress-bar success" style="width:100%"></div></div>
+              <div class="text-xs text-muted mb-12">Auto-backup every 6 hours</div>
+              <button class="btn btn-sm btn-outline w-100" onclick="Toast.success('Backup','Manual backup completed')">⬇ Backup Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === AUDIT LOG === -->
+      <div id="tab-audit" class="tab-pane">
+        <div class="card fade-up">
+          <div class="card-header">
+            <div>
+              <div class="card-title">System Audit Log</div>
+              <div class="card-subtitle">All critical actions are logged immutably</div>
+            </div>
+            <select class="fsel">
+              <option>All Actions</option><option>User Login</option><option>Approvals</option><option>Configuration</option>
+            </select>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead><tr>
+                <th>Timestamp</th><th>User</th><th>Action</th><th>Object</th><th>IP Address</th><th>Result</th>
+              </tr></thead>
+              <tbody id="auditTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- New User Modal -->
+<div class="modal-overlay" id="newUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New User</div>
+      <button class="modal-close" onclick="Modal.close('newUserModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="userForm" onsubmit="saveUser(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Full Name</label>
+            <input class="form-control" name="name" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Email</label>
+            <input class="form-control" name="email" type="email" required/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Role</label>
+            <select class="form-control" name="role" required>
+              <option value="">Select...</option>
+              <option value="admin">Admin</option>
+              <option value="procurement">Procurement Staff</option>
+              <option value="finance">Finance Team</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Department</label>
+            <input class="form-control" name="dept" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label req">Temporary Password</label>
+          <input class="form-control" name="password" type="password" required/>
+          <div class="form-hint">User will be prompted to change on first login</div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('newUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('userForm').requestSubmit()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch::before {
+  content: ''; position: absolute; inset: 0; cursor: pointer;
+  background: #CBD5E1; transition: .3s; border-radius: 20px;
+}
+.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.switch input:checked ~ ::before, .switch:has(input:checked)::before { background: #2563EB; }
+.switch:has(input:checked)::after { transform: translateX(16px); }
+</style>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+const user = initPage('admin', 'Admin Panel', ['Home', 'Admin']);
+
+// Restrict to admin role
+if (user && user.role !== 'admin') {
+  Toast.warning('Access Restricted', 'Admin privileges required');
+}
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+let allUsers = [...P2PData.users];
+
+function renderUsers(list = allUsers) {
+  const roleLabel = { admin: 'Administrator', procurement: 'Procurement Staff', finance: 'Finance Team' };
+  const roleBadge = { admin: 'badge-purple', procurement: 'badge-primary', finance: 'badge-info' };
+  document.getElementById('usersTbody').innerHTML = list.length ? list.map(u => `
+    <tr>
+      <td>
+        <div class="d-flex align-center gap-8">
+          <div class="uavatar" style="background:${u.avatar};width:30px;height:30px">${u.initials}</div>
+          <span class="td-primary">${u.name}</span>
+        </div>
+      </td>
+      <td>${u.email}</td>
+      <td><span class="badge ${roleBadge[u.role]}">${roleLabel[u.role]}</span></td>
+      <td>${u.dept}</td>
+      <td><span class="badge badge-success">Active</span></td>
+      <td class="text-xs">${u.id === 'u001' ? 'Just now' : ['2h ago','1d ago','3h ago','5d ago','1w ago'][Math.floor(Math.random()*5)]}</td>
+      <td>
+        <button class="btn btn-sm btn-ghost btn-icon" onclick="editUser('${u.id}')" title="Edit">✎</button>
+        <button class="btn btn-sm btn-ghost btn-icon" onclick="deleteUser('${u.id}')" title="Delete" style="color:var(--danger)">🗑</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">👤</div><h4>No users found</h4></div></td></tr>`;
+}
+
+function renderRules() {
+  document.getElementById('rulesTbody').innerHTML = P2PData.approvalRules.map((r, i) => `
+    <tr>
+      <td class="td-primary">Tier ${i+1}</td>
+      <td><strong>${r.range}</strong></td>
+      <td><span class="badge badge-primary">${r.approver}</span></td>
+      <td>${r.sla}</td>
+      <td>${i < 2 ? '<span class="badge badge-success">Enabled</span>' : '<span class="badge badge-neutral">Manual</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAudit() {
+  const logs = [
+    { time: '2 min ago',  user: 'Sarah Chen',   action: 'Approved Requisition',    obj: 'PR-2025-0142', ip: '192.168.1.45',  result: 'success' },
+    { time: '15 min ago', user: 'Priya Nair',   action: 'Processed Payment',       obj: 'PAY-2025-0201',ip: '192.168.1.62',  result: 'success' },
+    { time: '1 hr ago',   user: 'James Rivera', action: 'Created Purchase Order',  obj: 'PO-2025-0098', ip: '192.168.1.78',  result: 'success' },
+    { time: '2 hr ago',   user: 'Sarah Chen',   action: 'Updated User Permission', obj: 'u002',         ip: '192.168.1.45',  result: 'success' },
+    { time: '3 hr ago',   user: 'Aisha Malik',  action: 'Logged In',               obj: 'Auth Session', ip: '192.168.1.91',  result: 'success' },
+    { time: '5 hr ago',   user: 'Tom Bradley',  action: 'Login Attempt',           obj: 'Auth Session', ip: '203.45.12.88',  result: 'failed'  },
+    { time: '6 hr ago',   user: 'Priya Nair',   action: 'Rejected Requisition',    obj: 'PR-2025-0139', ip: '192.168.1.62',  result: 'success' },
+    { time: '8 hr ago',   user: 'Sarah Chen',   action: 'Added New Supplier',      obj: 'SUP-007',      ip: '192.168.1.45',  result: 'success' },
+    { time: '1 day ago',  user: 'James Rivera', action: 'Generated Report',        obj: 'Q1-Spend',     ip: '192.168.1.78',  result: 'success' },
+  ];
+  document.getElementById('auditTbody').innerHTML = logs.map(l => `
+    <tr>
+      <td class="text-xs">${l.time}</td>
+      <td class="td-primary">${l.user}</td>
+      <td>${l.action}</td>
+      <td class="td-mono">${l.obj}</td>
+      <td class="text-xs text-muted">${l.ip}</td>
+      <td><span class="badge ${l.result === 'success' ? 'badge-success' : 'badge-danger'}">${l.result === 'success' ? '✓ Success' : '✗ Failed'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers(q) {
+  const s = q.toLowerCase();
+  renderUsers(allUsers.filter(u =>
+    u.name.toLowerCase().includes(s) ||
+    u.email.toLowerCase().includes(s) ||
+    u.dept.toLowerCase().includes(s)
+  ));
+}
+
+function saveUser(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const newUser = {
+    id: 'u' + String(allUsers.length + 1).padStart(3, '0'),
+    name: fd.get('name'),
+    email: fd.get('email'),
+    role: fd.get('role'),
+    dept: fd.get('dept'),
+    password: fd.get('password'),
+    avatar: '#' + Math.floor(Math.random()*16777215).toString(16),
+    initials: fd.get('name').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)
+  };
+  allUsers.unshift(newUser);
+  document.getElementById('statUsers').textContent = allUsers.length;
+  renderUsers();
+  Modal.close('newUserModal');
+  e.target.reset();
+  Toast.success('User Created', newUser.name + ' added to system');
+}
+
+function editUser(id) {
+  Toast.info('Edit User', 'User editing dialog (production feature)');
+}
+
+function deleteUser(id) {
+  if (id === 'u001') { Toast.warning('Cannot Delete', 'Cannot delete primary admin'); return; }
+  if (!confirm('Delete this user?')) return;
+  allUsers = allUsers.filter(u => u.id !== id);
+  document.getElementById('statUsers').textContent = allUsers.length;
+  renderUsers();
+  Toast.success('Deleted', 'User removed from system');
+}
+
+function resetDemoData() {
+  if (!confirm('This will reset all demo data to defaults. Continue?')) return;
+  ['suppliers','requisitions','pos','invoices','payments'].forEach(k => Store.remove(k));
+  Toast.success('Reset Complete', 'Demo data restored to defaults');
+  setTimeout(() => location.reload(), 1200);
+}
+
+document.getElementById('statUsers').textContent = allUsers.length;
+document.getElementById('statRules').textContent = P2PData.approvalRules.length;
+renderUsers();
+renderRules();
+renderAudit();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "p2p-solutions",
+  "version": "1.0.0",
+  "description": "Procure-to-Pay Enterprise Solution — University Mini Project (FIT2 Group 8)",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "serve": "npx http-server -p 3000 -c-1"
+  },
+  "keywords": [
+    "p2p",
+    "procurement",
+    "procure-to-pay",
+    "enterprise",
+    "dashboard",
+    "workflow-automation"
+  ],
+  "author": "FIT2 Group 8 — Denise Isabelle Reynold, Abduvaliev Abdushukur, Eng Zheng Dong",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

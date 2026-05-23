@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <!-- Welcome Banner -->
+      <div id="welcomeBanner" class="fade-up" style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#0ea5e9 100%);border-radius:var(--radius-lg);padding:22px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative;">
+        <div style="position:absolute;right:80px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,0.05);border-radius:50%;"></div>
+        <div style="position:absolute;right:0px;top:10px;width:120px;height:120px;background:rgba(255,255,255,0.04);border-radius:50%;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">Good morning 👋</div>
+          <div id="welcomeName" style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back!</div>
+          <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong id="pendingCount" style="color:#fff">0</strong> pending approvals and <strong id="overdueCount" style="color:#FCD34D">0</strong> overdue invoices.</div>
+        </div>
+        <div style="display:flex;gap:10px;position:relative;z-index:1;">
+          <a href="requisition.html" class="btn" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.2);backdrop-filter:blur(4px);">New Requisition</a>
+          <a href="reports.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">View Reports</a>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid fade-up d1">
+        <div class="stat-card">
+          <div class="sic blue">📋</div>
+          <div class="sinfo">
+            <div class="sval" id="statPR">—</div>
+            <div class="slbl">Total Requisitions</div>
+            <div class="schg up">↑ 12% this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sic green">📦</div>
+          <div class="sinfo">
+            <div class="sval" id="statPO">—</div>
+            <div class="slbl">Purchase Orders</div>
+            <div class="schg up">↑ 8% this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sic amber">🧾</div>
+          <div class="sinfo">
+            <div class="sval" id="statInv">—</div>
+            <div class="slbl">Open Invoices</div>
+            <div class="schg down">↓ 2 overdue</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sic purple">💰</div>
+          <div class="sinfo">
+            <div class="sval" id="statSpend">—</div>
+            <div class="slbl">Total Spend (Apr)</div>
+            <div class="schg up">↑ 9.3% vs last month</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid-2 mb-20 fade-up d2">
+        <!-- Monthly Spend -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Monthly Spend Trend</div>
+              <div class="card-subtitle">Last 7 months (RM)</div>
+            </div>
+            <select class="fsel" id="spendPeriod" onchange="renderSpendChart()">
+              <option value="7">Last 7 months</option>
+              <option value="4">Last 4 months</option>
+            </select>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap"><canvas id="spendChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Spend by Category</div>
+              <div class="card-subtitle">April 2025</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="grid-2 fade-up d3">
+        <!-- Pending Approvals -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Pending Approvals</div>
+            <a href="requisition.html" class="btn btn-sm btn-secondary">View All</a>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Description</th><th>Amount</th><th>Priority</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="pendingTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Activity</div>
+            <span class="badge badge-primary">Live</span>
+          </div>
+          <div class="card-body">
+            <div class="timeline" id="activityTimeline"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PO Status + Supplier Performance -->
+      <div class="grid-2 mt-8 fade-up d4" style="margin-top:14px">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">PO Status Distribution</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap short"><canvas id="poStatusChart"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top Supplier Performance</div>
+          </div>
+          <div class="card-body">
+            <div id="supplierPerf"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main-content -->
+</div><!-- /app-wrapper -->
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('dashboard', 'Dashboard', 'Overview');
+  if (!user) return;
+
+  // Welcome
+  document.getElementById('welcomeName').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
+
+  // Stats
+  const reqs = Store.getRequisitions();
+  const pos  = Store.getPOs();
+  const invs = Store.getInvoices();
+
+  const pending  = reqs.filter(r => r.status === 'pending').length;
+  const overdue  = invs.filter(i => i.status === 'overdue').length;
+  const openInv  = invs.filter(i => i.status !== 'paid').length;
+  const aprSpend = pos.filter(p => p.status !== 'pending').reduce((a,p) => a + p.amount, 0);
+
+  document.getElementById('pendingCount').textContent = pending;
+  document.getElementById('overdueCount').textContent = overdue;
+  document.getElementById('statPR').textContent   = reqs.length;
+  document.getElementById('statPO').textContent   = pos.length;
+  document.getElementById('statInv').textContent  = openInv;
+  document.getElementById('statSpend').textContent = 'RM ' + (aprSpend/1000).toFixed(0) + 'K';
+
+  // Pending table
+  const pendingItems = reqs.filter(r => r.status === 'pending').slice(0, 5);
+  const ptbl = document.getElementById('pendingTable');
+  if (pendingItems.length === 0) {
+    ptbl.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">✓</div><h4>All caught up!</h4><p>No pending approvals</p></div></td></tr>`;
+  } else {
+    ptbl.innerHTML = pendingItems.map(r => `
+      <tr>
+        <td class="td-mono">${r.id}</td>
+        <td class="td-primary">${r.title.length>30 ? r.title.substring(0,30)+'…':r.title}</td>
+        <td>${Util.formatCurrency(r.amount)}</td>
+        <td>${Badge.priority(r.priority)}</td>
+        <td>
+          <button class="btn btn-sm btn-success" onclick="approveItem('${r.id}')">Approve</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  // Activity timeline
+  const activities = [
+    { icon:'📦', color:'#10B981', bg:'#ECFDF5', title:'PO-2025-0098 Delivered', time:'2 hours ago' },
+    { icon:'🧾', color:'#2563EB', bg:'#EFF6FF', title:'INV-2025-0307 Received', time:'5 hours ago' },
+    { icon:'✅', color:'#8B5CF6', bg:'#F5F3FF', title:'PR-2025-0142 Approved', time:'1 day ago'   },
+    { icon:'⚠️', color:'#F59E0B', bg:'#FFFBEB', title:'INV-2025-0306 Overdue', time:'1 day ago'   },
+    { icon:'💳', color:'#10B981', bg:'#ECFDF5', title:'PAY-2025-0201 Completed (RM 48,336)', time:'2 days ago' },
+  ];
+
+  document.getElementById('activityTimeline').innerHTML = activities.map(a => `
+    <div class="tl-item">
+      <div class="tl-dot" style="background:${a.bg};color:${a.color}">${a.icon}</div>
+      <div class="tl-content">
+        <div class="tl-title">${a.title}</div>
+        <div class="tl-time">${a.time}</div>
+      </div>
+    </div>`).join('');
+
+  // Supplier Performance
+  document.getElementById('supplierPerf').innerHTML = P2PData.supplierPerformance.map((s, i) => `
+    <div style="margin-bottom:14px">
+      <div class="d-flex align-center justify-between mb-4">
+        <span style="font-size:0.78rem;font-weight:500;color:var(--text-primary)">${i+1}. ${s.name}</span>
+        <span style="font-size:0.78rem;font-weight:700;color:var(--accent)">${s.score}%</span>
+      </div>
+      <div class="progress">
+        <div class="progress-bar ${s.score>=95?'success':s.score>=85?'':'warning'}" style="width:${s.score}%"></div>
+      </div>
+    </div>`).join('');
+
+  chartDefaults();
+  renderSpendChart();
+  renderCategoryChart();
+  renderPOStatusChart();
+
+  // Show welcome toast
+  setTimeout(() => Toast.info('Dashboard Loaded', `Welcome, ${user.name}! ${pending} pending approvals.`), 600);
+});
+
+function approveItem(id) {
+  const reqs = Store.getRequisitions();
+  const idx = reqs.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    reqs[idx].status = 'approved';
+    reqs[idx].approvedBy = Store.getUser()?.name;
+    Store.saveRequisitions(reqs);
+    Toast.success('Approved', `${id} has been approved successfully.`);
+    setTimeout(() => location.reload(), 1000);
+  }
+}
+
+let spendChart;
+function renderSpendChart() {
+  const ctx = document.getElementById('spendChart').getContext('2d');
+  const n   = parseInt(document.getElementById('spendPeriod')?.value || 7);
+  const d   = P2PData.monthlySpend;
+  const labels = d.labels.slice(-n);
+  const data   = d.data.slice(-n);
+  if (spendChart) spendChart.destroy();
+  spendChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Spend (RM)',
+        data,
+        backgroundColor: 'rgba(37,99,235,0.12)',
+        borderColor: '#2563EB',
+        borderWidth: 2,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => 'RM ' + (v/1000).toFixed(0) + 'K' } }
+      }
+    }
+  });
+}
+
+function renderCategoryChart() {
+  const ctx = document.getElementById('categoryChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: P2PData.categorySpend.labels,
+      datasets: [{
+        data: P2PData.categorySpend.data,
+        backgroundColor: ['#2563EB','#10B981','#F59E0B','#8B5CF6','#06B6D4','#94A3B8'],
+        borderWidth: 2, borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { padding: 12, font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
+      },
+      cutout: '65%',
+    }
+  });
+}
+
+function renderPOStatusChart() {
+  const ctx = document.getElementById('poStatusChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: P2PData.poStatus.labels,
+      datasets: [{
+        label: 'POs',
+        data: P2PData.poStatus.data,
+        backgroundColor: ['#10B981','#2563EB','#06B6D4','#94A3B8'],
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false } }, y: { grid: { color: '#F1F5F9' } } }
+    }
+  });
+}
+</script>
+</body>
+</html>

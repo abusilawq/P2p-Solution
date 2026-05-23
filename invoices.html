@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoices — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Invoice Management</h2>
+          <p>Track, match and process supplier invoices</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="exportInvoices()">⬇ Export</button>
+          <button class="btn btn-primary" onclick="Modal.open('newInvModal')">+ Add Invoice</button>
+        </div>
+      </div>
+
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic blue">🧾</div><div class="sinfo"><div class="sval" id="totalInv">—</div><div class="slbl">Total Invoices</div></div></div>
+        <div class="stat-card"><div class="sic green">✅</div><div class="sinfo"><div class="sval" id="paidInv">—</div><div class="slbl">Paid</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏳</div><div class="sinfo"><div class="sval" id="pendingInv">—</div><div class="slbl">Pending</div></div></div>
+        <div class="stat-card"><div class="sic red">⚠</div><div class="sinfo"><div class="sval" id="overdueInv">—</div><div class="slbl">Overdue</div></div></div>
+      </div>
+
+      <!-- 3-way Match Info Banner -->
+      <div class="fade-up d2" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;color:#fff">
+        <div>
+          <div style="font-weight:700;font-size:0.88rem;margin-bottom:2px">🔍 3-Way Invoice Matching</div>
+          <div style="font-size:0.76rem;opacity:.75">Invoices are automatically matched against POs and delivery receipts</div>
+        </div>
+        <div style="display:flex;gap:20px;text-align:center">
+          <div><div id="matchedCount" style="font-size:1.3rem;font-weight:700"></div><div style="font-size:0.65rem;opacity:.7">Matched</div></div>
+          <div><div id="mismatchCount" style="font-size:1.3rem;font-weight:700;color:#FCD34D"></div><div style="font-size:0.65rem;opacity:.7">Mismatch</div></div>
+          <div><div id="matchPendingCount" style="font-size:1.3rem;font-weight:700;color:#93C5FD"></div><div style="font-size:0.65rem;opacity:.7">Pending</div></div>
+        </div>
+      </div>
+
+      <div class="card fade-up d3">
+        <div class="card-header">
+          <div class="card-title">All Invoices</div>
+          <div class="toolbar" style="margin:0">
+            <div class="search-bar" style="width:200px">
+              <span class="si">🔍</span>
+              <input class="form-control" id="invSearch" placeholder="Search invoices…" oninput="filterTable('invSearch','invTable')"/>
+            </div>
+            <select class="fsel" onchange="filterInv(this.value)">
+              <option value="">All Status</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+              <option value="disputed">Disputed</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="invTable">
+            <thead>
+              <tr>
+                <th>Invoice No.</th>
+                <th>PO Reference</th>
+                <th>Supplier</th>
+                <th>Amount</th>
+                <th>Tax (6%)</th>
+                <th>Total</th>
+                <th>Match Status</th>
+                <th>Status</th>
+                <th>Issued</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invTableBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer d-flex align-center justify-between">
+          <span id="invCount" style="font-size:0.75rem;color:var(--text-muted)"></span>
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-muted)">Total Outstanding: </span>
+            <span id="outstanding" style="font-weight:700;color:var(--danger)"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Invoice Modal -->
+<div class="modal-overlay" id="newInvModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Invoice</span>
+      <button class="modal-close" onclick="Modal.close('newInvModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="invForm">
+        <div class="form-group">
+          <label class="form-label req">Invoice Number</label>
+          <input class="form-control" id="invNum" placeholder="INV-XXXX-XXXX" required/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Linked PO</label>
+            <select class="form-control" id="invPO">
+              <option value="">None (standalone)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Supplier</label>
+            <select class="form-control" id="invSupplier" required>
+              <option value="">Select supplier…</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Invoice Amount (RM)</label>
+            <input type="number" class="form-control" id="invAmount" min="0" step="0.01" required onchange="calcTax()"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tax (6% SST)</label>
+            <input class="form-control" id="invTax" readonly style="background:var(--bg)"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Issue Date</label>
+            <input type="date" class="form-control" id="invIssued"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Due Date</label>
+            <input type="date" class="form-control" id="invDue" required/>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('newInvModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let allInvs = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('invoices', 'Invoices', 'Invoice Management');
+  if (!user) return;
+  loadInvoices();
+  populateDropdowns();
+  document.getElementById('invIssued').value = Util.today();
+  document.getElementById('invDue').value = Util.addDays(Util.today(), 30);
+});
+
+function loadInvoices() {
+  allInvs = Store.getInvoices();
+  renderInvoices(allInvs);
+  updateStats(allInvs);
+}
+
+function updateStats(data) {
+  document.getElementById('totalInv').textContent   = data.length;
+  document.getElementById('paidInv').textContent    = data.filter(i=>i.status==='paid').length;
+  document.getElementById('pendingInv').textContent = data.filter(i=>i.status==='pending').length;
+  document.getElementById('overdueInv').textContent = data.filter(i=>i.status==='overdue').length;
+  document.getElementById('matchedCount').textContent      = data.filter(i=>i.matchStatus==='matched').length;
+  document.getElementById('mismatchCount').textContent     = data.filter(i=>i.matchStatus==='mismatch').length;
+  document.getElementById('matchPendingCount').textContent = data.filter(i=>i.matchStatus==='pending').length;
+  const outstanding = data.filter(i=>i.status!=='paid').reduce((a,i)=>a+i.total,0);
+  document.getElementById('outstanding').textContent = Util.formatCurrency(outstanding);
+  document.getElementById('invCount').textContent = `${data.length} invoices`;
+}
+
+function matchBadge(m) {
+  const map = { matched:'success', mismatch:'danger', pending:'warning' };
+  return `<span class="badge badge-${map[m]||'neutral'}">${m}</span>`;
+}
+
+function isOverdue(due, status) {
+  return status !== 'paid' && new Date(due) < new Date();
+}
+
+function renderInvoices(data) {
+  const tbody = document.getElementById('invTableBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🧾</div><h4>No invoices found</h4></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(inv => {
+    const overdue = isOverdue(inv.due, inv.status);
+    return `
+    <tr>
+      <td class="td-mono">${inv.id}</td>
+      <td class="td-mono" style="color:var(--text-muted)">${inv.poId||'—'}</td>
+      <td class="td-primary">${inv.supplier.length>22?inv.supplier.substring(0,22)+'…':inv.supplier}</td>
+      <td>${Util.formatCurrency(inv.amount)}</td>
+      <td>${Util.formatCurrency(inv.tax)}</td>
+      <td style="font-weight:600">${Util.formatCurrency(inv.total)}</td>
+      <td>${matchBadge(inv.matchStatus)}</td>
+      <td>${Badge.status(inv.status)}</td>
+      <td>${Util.formatDate(inv.issued)}</td>
+      <td style="${overdue?'color:var(--danger);font-weight:600':''}">${Util.formatDate(inv.due)}${overdue?' ⚠':''}</td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-secondary" onclick="toggleDropdown('idd-${inv.id}')">⋯</button>
+          <div class="dropdown-menu" id="idd-${inv.id}">
+            <div class="drop-item" onclick="markPaid('${inv.id}')">💳 Mark Paid</div>
+            <div class="drop-item" onclick="rematch('${inv.id}')">🔄 Re-Match</div>
+            <div class="drop-divider"></div>
+            <div class="drop-item danger" onclick="deleteInv('${inv.id}')">🗑 Delete</div>
+          </div>
+        </div>
+      </td>
+    </tr>`;}).join('');
+}
+
+function filterInv(status) {
+  renderInvoices(status ? allInvs.filter(i=>i.status===status) : allInvs);
+}
+
+function markPaid(id) {
+  const invs = Store.getInvoices();
+  const idx  = invs.findIndex(i=>i.id===id);
+  if (idx>=0 && invs[idx].status!=='paid') {
+    invs[idx].status = 'paid';
+    invs[idx].paid   = Util.today();
+    Store.saveInvoices(invs);
+    Toast.success('Paid', `${id} marked as paid.`);
+    loadInvoices();
+  } else Toast.warning('Info','Invoice is already paid or not found.');
+}
+
+function rematch(id) {
+  const invs = Store.getInvoices();
+  const idx  = invs.findIndex(i=>i.id===id);
+  if (idx>=0) {
+    invs[idx].matchStatus = invs[idx].poId ? 'matched' : 'mismatch';
+    Store.saveInvoices(invs);
+    Toast.success('Rematched',`${id} match status updated.`);
+    loadInvoices();
+  }
+}
+
+function deleteInv(id) {
+  if (!confirm('Delete this invoice?')) return;
+  Store.saveInvoices(Store.getInvoices().filter(i=>i.id!==id));
+  Toast.info('Deleted','Invoice removed.');
+  loadInvoices();
+}
+
+function calcTax() {
+  const amt = parseFloat(document.getElementById('invAmount').value)||0;
+  document.getElementById('invTax').value = (amt*0.06).toFixed(2);
+}
+
+function populateDropdowns() {
+  const poSel = document.getElementById('invPO');
+  Store.getPOs().forEach(po => {
+    const opt=document.createElement('option'); opt.value=po.id; opt.textContent=`${po.id} — ${po.supplier.substring(0,30)}`; poSel.appendChild(opt);
+  });
+  const supSel = document.getElementById('invSupplier');
+  Store.getSuppliers().filter(s=>s.status==='active').forEach(s => {
+    const opt=document.createElement('option'); opt.value=s.id; opt.textContent=s.name; supSel.appendChild(opt);
+  });
+}
+
+function saveInvoice() {
+  const num     = document.getElementById('invNum').value.trim();
+  const supId   = document.getElementById('invSupplier').value;
+  const amount  = parseFloat(document.getElementById('invAmount').value);
+  const due     = document.getElementById('invDue').value;
+  if (!num||!supId||!amount||!due) { Toast.warning('Validation','Fill all required fields.'); return; }
+
+  const sup  = Store.getSuppliers().find(s=>s.id===supId);
+  const poId = document.getElementById('invPO').value;
+  const tax  = parseFloat((amount*0.06).toFixed(2));
+  const list = Store.getInvoices();
+  list.unshift({
+    id:          num,
+    poId:        poId||null,
+    supplier:    sup?.name||'Unknown',
+    amount, tax, total: amount+tax,
+    status:      new Date(due)<new Date()?'overdue':'pending',
+    issued:      document.getElementById('invIssued').value||Util.today(),
+    due,
+    paid:        null,
+    matchStatus: poId?'matched':'mismatch',
+  });
+  Store.saveInvoices(list);
+  Modal.close('newInvModal');
+  Toast.success('Invoice Added', `${num} added successfully.`);
+  loadInvoices();
+}
+
+function exportInvoices() {
+  const h='ID,PO,Supplier,Amount,Tax,Total,Status,Issued,Due\n';
+  const r=allInvs.map(i=>`${i.id},${i.poId||''},"${i.supplier}",${i.amount},${i.tax},${i.total},${i.status},${i.issued},${i.due}`).join('\n');
+  const b=new Blob([h+r],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='invoices.csv'; a.click();
+  Toast.success('Exported','Invoices downloaded');
+}
+</script>
+</body>
+</html>

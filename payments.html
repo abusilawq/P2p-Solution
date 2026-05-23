@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payments — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2>Payment Tracking</h2>
+          <p>Monitor all payment transactions and schedules</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="exportPayments()">⬇ Export</button>
+          <button class="btn btn-primary" onclick="Modal.open('newPayModal')">+ Record Payment</button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic green">💳</div><div class="sinfo"><div class="sval" id="paidTotal">—</div><div class="slbl">Total Paid</div></div></div>
+        <div class="stat-card"><div class="sic blue">📅</div><div class="sinfo"><div class="sval" id="scheduledTotal">—</div><div class="slbl">Scheduled</div></div></div>
+        <div class="stat-card"><div class="sic red">⚠</div><div class="sinfo"><div class="sval" id="overdueTotal">—</div><div class="slbl">Overdue Amount</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏳</div><div class="sinfo"><div class="sval" id="pendingCount">—</div><div class="slbl">Pending Payments</div></div></div>
+      </div>
+
+      <!-- Tabs: All / Completed / Pending / Overdue -->
+      <div class="card fade-up d2">
+        <div class="card-header">
+          <div class="card-title">Transaction History</div>
+          <div class="toolbar" style="margin:0">
+            <div class="search-bar" style="width:200px">
+              <span class="si">🔍</span>
+              <input class="form-control" id="paySearch" placeholder="Search…" oninput="filterTable('paySearch','payTable')"/>
+            </div>
+            <select class="fsel" onchange="filterPay(this.value)">
+              <option value="">All</option>
+              <option value="completed">Completed</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="payTable">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Invoice Ref.</th>
+                <th>Supplier</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Reference No.</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Processed By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="payTableBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer d-flex align-center justify-between">
+          <span id="payCount" style="font-size:0.75rem;color:var(--text-muted)"></span>
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-muted)">Total Transactions: </span>
+            <span id="totalValue" style="font-weight:700;color:var(--accent)"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Record Payment Modal -->
+<div class="modal-overlay" id="newPayModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Record Payment</span>
+      <button class="modal-close" onclick="Modal.close('newPayModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="payForm">
+        <div class="form-group">
+          <label class="form-label req">Invoice Reference</label>
+          <select class="form-control" id="payInvId" required onchange="autoFillPay()">
+            <option value="">Select invoice…</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <input class="form-control" id="paySupplier" readonly style="background:var(--bg)"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label req">Amount (RM)</label>
+            <input type="number" class="form-control" id="payAmount" required min="0" step="0.01"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Payment Method</label>
+            <select class="form-control" id="payMethod" required>
+              <option>Bank Transfer</option>
+              <option>Cheque</option>
+              <option>Online Banking</option>
+              <option>Credit Card</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reference No.</label>
+            <input class="form-control" id="payRef" placeholder="TT-XXXXXX"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Payment Date</label>
+            <input type="date" class="form-control" id="payDate" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-control" id="payNotes" placeholder="Optional notes…"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Modal.close('newPayModal')">Cancel</button>
+      <button class="btn btn-success" onclick="recordPayment()">💳 Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let allPayments = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('payments', 'Payments', 'Payment Tracking');
+  if (!user) return;
+  loadPayments();
+  populateDropdowns();
+  document.getElementById('payDate').value = Util.today();
+});
+
+function loadPayments() {
+  allPayments = Store.getPayments();
+  renderPayments(allPayments);
+  updateStats(allPayments);
+}
+
+function updateStats(data) {
+  const paid = data.filter(p=>p.status==='completed').reduce((a,p)=>a+p.amount,0);
+  const sched= data.filter(p=>p.status==='scheduled').reduce((a,p)=>a+p.amount,0);
+  const ovrd = data.filter(p=>p.status==='overdue').reduce((a,p)=>a+p.amount,0);
+  const pend = data.filter(p=>p.status==='pending').length;
+  const total= data.reduce((a,p)=>a+p.amount,0);
+
+  document.getElementById('paidTotal').textContent     = 'RM ' + (paid/1000).toFixed(0) + 'K';
+  document.getElementById('scheduledTotal').textContent= Util.formatCurrency(sched);
+  document.getElementById('overdueTotal').textContent  = Util.formatCurrency(ovrd);
+  document.getElementById('pendingCount').textContent  = pend;
+  document.getElementById('totalValue').textContent    = Util.formatCurrency(total);
+  document.getElementById('payCount').textContent = `${data.length} transactions`;
+}
+
+function renderPayments(data) {
+  const tbody = document.getElementById('payTableBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">💳</div><h4>No payments recorded</h4></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td class="td-mono">${p.id}</td>
+      <td class="td-mono" style="color:var(--text-muted)">${p.invId}</td>
+      <td class="td-primary">${p.supplier.length>22?p.supplier.substring(0,22)+'…':p.supplier}</td>
+      <td style="font-weight:600">${Util.formatCurrency(p.amount)}</td>
+      <td>${p.method}</td>
+      <td><span style="font-family:monospace;font-size:0.72rem">${p.ref}</span></td>
+      <td>${Badge.status(p.status)}</td>
+      <td>${Util.formatDate(p.date)}</td>
+      <td>${p.processedBy}</td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-secondary" onclick="toggleDropdown('pdd-${p.id}')">⋯</button>
+          <div class="dropdown-menu" id="pdd-${p.id}">
+            <div class="drop-item" onclick="markComplete('${p.id}')">✅ Mark Complete</div>
+            <div class="drop-item" onclick="printReceipt('${p.id}')">🖨 Receipt</div>
+            <div class="drop-divider"></div>
+            <div class="drop-item danger" onclick="deletePayment('${p.id}')">🗑 Delete</div>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterPay(status) {
+  renderPayments(status ? allPayments.filter(p=>p.status===status) : allPayments);
+}
+
+function markComplete(id) {
+  const pays = Store.getPayments();
+  const idx  = pays.findIndex(p=>p.id===id);
+  if (idx>=0) { pays[idx].status='completed'; Store.savePayments(pays); Toast.success('Completed',`${id} marked as completed.`); loadPayments(); }
+}
+
+function deletePayment(id) {
+  if (!confirm('Delete this payment record?')) return;
+  Store.savePayments(Store.getPayments().filter(p=>p.id!==id));
+  Toast.info('Deleted','Payment record removed.');
+  loadPayments();
+}
+
+function populateDropdowns() {
+  const sel = document.getElementById('payInvId');
+  Store.getInvoices().filter(i=>i.status!=='paid').forEach(inv => {
+    const opt=document.createElement('option'); opt.value=inv.id;
+    opt.textContent=`${inv.id} — ${inv.supplier.substring(0,25)} (${Util.formatCurrency(inv.total)})`;
+    opt._supplier = inv.supplier; opt._amount = inv.total;
+    sel.appendChild(opt);
+  });
+}
+
+function autoFillPay() {
+  const sel = document.getElementById('payInvId');
+  const opt = sel.options[sel.selectedIndex];
+  if (opt._supplier) document.getElementById('paySupplier').value = opt._supplier;
+  if (opt._amount)   document.getElementById('payAmount').value   = opt._amount;
+}
+
+function recordPayment() {
+  const invId  = document.getElementById('payInvId').value;
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  const method = document.getElementById('payMethod').value;
+  const date   = document.getElementById('payDate').value;
+  if (!invId||!amount||!date) { Toast.warning('Validation','Fill all required fields.'); return; }
+
+  const pays = Store.getPayments();
+  const user = Store.getUser();
+  const sup  = document.getElementById('paySupplier').value;
+  const newPay = {
+    id:          'PAY-2025-' + String(pays.length + 210).padStart(4,'0'),
+    invId, supplier: sup, amount, method,
+    ref:         document.getElementById('payRef').value || 'TT-' + Date.now().toString().slice(-6),
+    status:      new Date(date) <= new Date() ? 'completed' : 'scheduled',
+    date,
+    processedBy: user?.name || 'System',
+  };
+  pays.unshift(newPay);
+  Store.savePayments(pays);
+
+  // Mark invoice as paid if today
+  if (newPay.status==='completed') {
+    const invs = Store.getInvoices();
+    const idx  = invs.findIndex(i=>i.id===invId);
+    if (idx>=0) { invs[idx].status='paid'; invs[idx].paid=Util.today(); Store.saveInvoices(invs); }
+  }
+
+  Modal.close('newPayModal');
+  Toast.success('Payment Recorded', `${newPay.id} recorded (${method})`);
+  loadPayments();
+}
+
+function printReceipt(id) {
+  const p = allPayments.find(x=>x.id===id);
+  if (!p) return;
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Receipt ${p.id}</title><style>body{font-family:sans-serif;padding:40px;max-width:500px;margin:0 auto}h2{color:#2563eb;text-align:center}.amount{font-size:2rem;font-weight:800;color:#10b981;text-align:center;margin:20px 0}hr{border:none;border-top:1px solid #e2e8f0}table{width:100%}td{padding:6px 0}td:last-child{text-align:right;font-weight:500}.footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:30px}</style></head><body>
+  <h2>Payment Receipt</h2>
+  <div class="amount">${Util.formatCurrency(p.amount)}</div>
+  <hr/>
+  <table>
+    <tr><td>Receipt No.</td><td>${p.id}</td></tr>
+    <tr><td>Invoice</td><td>${p.invId}</td></tr>
+    <tr><td>Supplier</td><td>${p.supplier}</td></tr>
+    <tr><td>Method</td><td>${p.method}</td></tr>
+    <tr><td>Reference</td><td>${p.ref}</td></tr>
+    <tr><td>Date</td><td>${Util.formatDate(p.date)}</td></tr>
+    <tr><td>Status</td><td>${p.status.toUpperCase()}</td></tr>
+    <tr><td>Processed By</td><td>${p.processedBy}</td></tr>
+  </table>
+  <div class="footer">ACME Corporation Sdn Bhd · P2P Solutions · ${new Date().toLocaleString()}</div>
+  </body></html>`);
+  w.print();
+}
+
+function exportPayments() {
+  const h='ID,Invoice,Supplier,Amount,Method,Ref,Status,Date,ProcessedBy\n';
+  const r=allPayments.map(p=>`${p.id},${p.invId},"${p.supplier}",${p.amount},"${p.method}",${p.ref},${p.status},${p.date},"${p.processedBy}"`).join('\n');
+  const b=new Blob([h+r],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='payments.csv'; a.click();
+  Toast.success('Exported','Payments exported');
+}
+</script>
+</body>
+</html>

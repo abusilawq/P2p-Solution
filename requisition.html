@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Purchase Requisitions — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <!-- Page Header -->
+      <div class="page-header fade-up">
+        <div>
+          <h2>Purchase Requisitions</h2>
+          <p>Create and manage procurement requests with automated approval routing</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary" onclick="exportReqs()">⬇ Export</button>
+          <button class="btn btn-primary" onclick="Modal.open('newReqModal')">+ New Requisition</button>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic blue">📋</div><div class="sinfo"><div class="sval" id="totalReqs">—</div><div class="slbl">Total</div></div></div>
+        <div class="stat-card"><div class="sic amber">⏳</div><div class="sinfo"><div class="sval" id="pendingReqs">—</div><div class="slbl">Pending</div></div></div>
+        <div class="stat-card"><div class="sic green">✅</div><div class="sinfo"><div class="sval" id="approvedReqs">—</div><div class="slbl">Approved</div></div></div>
+        <div class="stat-card"><div class="sic red">✕</div><div class="sinfo"><div class="sval" id="rejectedReqs">—</div><div class="slbl">Rejected</div></div></div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="card fade-up d2">
+        <div class="card-header">
+          <div class="card-title">All Requisitions</div>
+          <div class="toolbar" style="margin:0;flex-wrap:nowrap;">
+            <div class="search-bar" style="width:220px">
+              <span class="si">🔍</span>
+              <input type="text" class="form-control" id="reqSearch" placeholder="Search…" oninput="filterTable('reqSearch','reqsTable')"/>
+            </div>
+            <select class="fsel" id="statusFilter" onchange="filterByStatus()">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <select class="fsel" id="priorityFilter" onchange="filterByStatus()">
+              <option value="">All Priority</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="reqsTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"/></th>
+                <th>Req. ID</th>
+                <th>Title</th>
+                <th>Department</th>
+                <th>Requester</th>
+                <th>Amount</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reqTableBody"></tbody>
+          </table>
+        </div>
+        <div class="card-footer d-flex align-center justify-between">
+          <span id="reqCount" style="font-size:0.75rem;color:var(--text-muted)"></span>
+          <div class="d-flex gap-6" id="bulkActions" style="display:none !important">
+            <button class="btn btn-sm btn-success" onclick="bulkApprove()">Approve Selected</button>
+            <button class="btn btn-sm btn-danger" onclick="bulkReject()">Reject Selected</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div>
+</div>
+
+<!-- ── NEW REQUISITION MODAL ── -->
+<div class="modal-overlay" id="newReqModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title">➕ Create Purchase Requisition</span>
+      <button class="modal-close" onclick="Modal.close('newReqModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Workflow Steps -->
+      <div class="wf-steps">
+        <div class="wf-step curr" id="step1"><div class="wf-dot">1</div><div class="wf-lbl">Details</div></div>
+        <div class="wf-step" id="step2"><div class="wf-dot">2</div><div class="wf-lbl">Items</div></div>
+        <div class="wf-step" id="step3"><div class="wf-dot">3</div><div class="wf-lbl">Review</div></div>
+      </div>
+
+      <form id="newReqForm">
+        <!-- Step 1: Basic Details -->
+        <div id="stepPanel1">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label req">Requisition Title</label>
+              <input class="form-control" id="reqTitle" placeholder="e.g. Laptop Procurement Q2" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Department</label>
+              <select class="form-control" id="reqDept" required>
+                <option value="">Select Department</option>
+                <option>Engineering</option><option>IT</option><option>Admin</option>
+                <option>Marketing</option><option>Finance</option><option>Operations</option>
+                <option>Human Resources</option><option>Logistics</option><option>Security</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label req">Category</label>
+              <select class="form-control" id="reqCategory" required>
+                <option value="">Select Category</option>
+                <option>IT Hardware</option><option>Cloud & SaaS</option><option>Office Supplies</option>
+                <option>Equipment</option><option>Logistics</option><option>Printing</option>
+                <option>Medical</option><option>Security</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Priority</label>
+              <select class="form-control" id="reqPriority" required>
+                <option value="">Select Priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label req">Required By Date</label>
+              <input type="date" class="form-control" id="reqDate" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label req">Estimated Amount (RM)</label>
+              <input type="number" class="form-control" id="reqAmount" placeholder="0.00" min="0" step="0.01" required onchange="updateApprovalInfo()"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Justification / Business Need</label>
+            <textarea class="form-control" id="reqJustification" placeholder="Explain why this purchase is required…"></textarea>
+          </div>
+          <div id="approvalInfo" style="display:none;background:var(--accent-light);border:1px solid #BFDBFE;border-radius:8px;padding:12px;margin-top:8px;">
+            <div style="font-size:0.78rem;font-weight:600;color:#1E40AF;margin-bottom:4px">📋 Approval Routing</div>
+            <div id="approvalText" style="font-size:0.75rem;color:#1E40AF"></div>
+          </div>
+        </div>
+
+        <!-- Step 2: Items -->
+        <div id="stepPanel2" style="display:none">
+          <div class="d-flex align-center justify-between mb-12">
+            <div style="font-weight:600;font-size:0.85rem">Line Items</div>
+            <button type="button" class="btn btn-sm btn-outline" onclick="addLineItem()">+ Add Item</button>
+          </div>
+          <div id="lineItems">
+            <div class="line-item-row" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end;">
+              <div><label class="form-label req">Item Description</label><input class="form-control item-desc" placeholder="e.g. Dell Laptop 15" required/></div>
+              <div><label class="form-label req">Qty</label><input type="number" class="form-control item-qty" value="1" min="1" onchange="calcLineTotal(this)"/></div>
+              <div><label class="form-label req">Unit Price (RM)</label><input type="number" class="form-control item-price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"/></div>
+              <div><label class="form-label">Total (RM)</label><input class="form-control item-total" readonly style="background:var(--bg)"/></div>
+              <div style="padding-top:24px"><button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.line-item-row').remove();updateItemsTotal()">✕</button></div>
+            </div>
+          </div>
+          <div style="text-align:right;margin-top:12px;padding:10px;background:var(--bg);border-radius:6px;">
+            <span style="font-size:0.78rem;color:var(--text-muted)">Items Total: </span>
+            <span id="itemsTotal" style="font-weight:700;font-size:0.9rem;color:var(--text-primary)">RM 0.00</span>
+          </div>
+        </div>
+
+        <!-- Step 3: Review -->
+        <div id="stepPanel3" style="display:none">
+          <div style="background:var(--bg);border-radius:8px;padding:16px;margin-bottom:14px">
+            <div style="font-weight:600;font-size:0.85rem;margin-bottom:10px">📋 Requisition Summary</div>
+            <div id="reviewContent"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Additional Notes / Comments</label>
+            <textarea class="form-control" id="reqNotes" placeholder="Any additional notes for the approver…"></textarea>
+          </div>
+          <div style="background:var(--warning-light);border:1px solid #FCD34D;border-radius:8px;padding:12px">
+            <div style="font-size:0.78rem;font-weight:600;color:#92400E">⚠ Declaration</div>
+            <label style="display:flex;gap:8px;margin-top:6px;cursor:pointer;font-size:0.76rem;color:#92400E">
+              <input type="checkbox" id="declareCheck" required/>
+              I confirm that this requisition is accurate, necessary, and compliant with company procurement policy.
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="display:none">← Back</button>
+      <button class="btn btn-secondary" onclick="Modal.close('newReqModal')">Cancel</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DETAIL MODAL ── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="detailTitle">Requisition Detail</span>
+      <button class="modal-close" onclick="Modal.close('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailContent"></div>
+    <div class="modal-footer" id="detailActions"></div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let allReqs = [];
+let currentStep = 1;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const user = initPage('requisition', 'Purchase Requisitions', 'Requisitions');
+  if (!user) return;
+  loadReqs();
+  // Set min date
+  document.getElementById('reqDate').min = Util.today();
+});
+
+function loadReqs() {
+  allReqs = Store.getRequisitions();
+  renderReqs(allReqs);
+  updateStats(allReqs);
+}
+
+function updateStats(data) {
+  document.getElementById('totalReqs').textContent   = data.length;
+  document.getElementById('pendingReqs').textContent  = data.filter(r=>r.status==='pending').length;
+  document.getElementById('approvedReqs').textContent = data.filter(r=>r.status==='approved').length;
+  document.getElementById('rejectedReqs').textContent = data.filter(r=>r.status==='rejected').length;
+  document.getElementById('reqCount').textContent = `Showing ${data.length} requisitions`;
+}
+
+function renderReqs(data) {
+  const tbody = document.getElementById('reqTableBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><h4>No requisitions found</h4><p>Create your first requisition</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><input type="checkbox" class="row-check" value="${r.id}"/></td>
+      <td class="td-mono">${r.id}</td>
+      <td class="td-primary" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td>${r.dept}</td>
+      <td>${r.requester}</td>
+      <td style="font-weight:500">${Util.formatCurrency(r.amount)}</td>
+      <td>${Badge.priority(r.priority)}</td>
+      <td>${Badge.status(r.status)}</td>
+      <td>${Util.formatDate(r.created)}</td>
+      <td>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-secondary" onclick="toggleDropdown('dd-${r.id}')">⋯</button>
+          <div class="dropdown-menu" id="dd-${r.id}">
+            <div class="drop-item" onclick="viewDetail('${r.id}');toggleDropdown('dd-${r.id}')">👁 View</div>
+            ${r.status==='pending'?`<div class="drop-item" onclick="changeStatus('${r.id}','approved')">✅ Approve</div><div class="drop-item danger" onclick="changeStatus('${r.id}','rejected')">✕ Reject</div>`:''}
+            <div class="drop-divider"></div>
+            <div class="drop-item danger" onclick="deleteReq('${r.id}')">🗑 Delete</div>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterByStatus() {
+  const stat = document.getElementById('statusFilter').value;
+  const prio = document.getElementById('priorityFilter').value;
+  let filtered = allReqs;
+  if (stat) filtered = filtered.filter(r => r.status === stat);
+  if (prio) filtered = filtered.filter(r => r.priority === prio);
+  renderReqs(filtered);
+}
+
+function changeStatus(id, status) {
+  const reqs = Store.getRequisitions();
+  const idx  = reqs.findIndex(r => r.id === id);
+  if (idx >= 0) {
+    reqs[idx].status = status;
+    reqs[idx].approvedBy = status === 'approved' ? Store.getUser()?.name : null;
+    Store.saveRequisitions(reqs);
+    Toast[status === 'approved' ? 'success' : 'warning'](
+      status === 'approved' ? 'Approved' : 'Rejected',
+      `${id} has been ${status}.`
+    );
+    loadReqs();
+  }
+}
+
+function deleteReq(id) {
+  if (!confirm('Delete this requisition?')) return;
+  const reqs = Store.getRequisitions().filter(r => r.id !== id);
+  Store.saveRequisitions(reqs);
+  Toast.info('Deleted', id + ' has been removed.');
+  loadReqs();
+}
+
+function viewDetail(id) {
+  const r = allReqs.find(r => r.id === id);
+  if (!r) return;
+  document.getElementById('detailTitle').textContent = r.id + ' — ' + r.title;
+  document.getElementById('detailContent').innerHTML = `
+    <div class="form-row" style="margin-bottom:12px">
+      <div><div class="form-label">Status</div>${Badge.status(r.status)}</div>
+      <div><div class="form-label">Priority</div>${Badge.priority(r.priority)}</div>
+    </div>
+    <div class="form-row">
+      <div><div class="form-label">Department</div><div class="fw-500">${r.dept}</div></div>
+      <div><div class="form-label">Requester</div><div class="fw-500">${r.requester}</div></div>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div><div class="form-label">Category</div><div class="fw-500">${r.category}</div></div>
+      <div><div class="form-label">Amount</div><div class="fw-500 text-accent" style="color:var(--accent)">${Util.formatCurrency(r.amount)}</div></div>
+    </div>
+    <div class="form-row" style="margin-top:10px">
+      <div><div class="form-label">Created</div>${Util.formatDate(r.created)}</div>
+      <div><div class="form-label">Approved By</div>${r.approvedBy || '—'}</div>
+    </div>
+    <div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:6px;">
+      <div class="form-label">Line Items: ${r.items} items</div>
+    </div>`;
+  document.getElementById('detailActions').innerHTML = r.status === 'pending' ? `
+    <button class="btn btn-danger btn-sm" onclick="changeStatus('${r.id}','rejected');Modal.close('detailModal')">Reject</button>
+    <button class="btn btn-success" onclick="changeStatus('${r.id}','approved');Modal.close('detailModal')">✅ Approve</button>` :
+    `<button class="btn btn-secondary" onclick="Modal.close('detailModal')">Close</button>`;
+  Modal.open('detailModal');
+}
+
+function exportReqs() {
+  const headers = 'ID,Title,Department,Amount,Priority,Status,Date\n';
+  const rows = allReqs.map(r => `${r.id},"${r.title}",${r.dept},${r.amount},${r.priority},${r.status},${r.created}`).join('\n');
+  const blob = new Blob([headers+rows], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='requisitions.csv'; a.click();
+  Toast.success('Exported', 'Requisitions downloaded as CSV');
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+}
+
+function bulkApprove() {
+  const ids = [...document.querySelectorAll('.row-check:checked')].map(c => c.value);
+  ids.forEach(id => changeStatus(id, 'approved'));
+  Toast.success('Bulk Approved', `${ids.length} requisitions approved`);
+}
+
+function bulkReject() {
+  const ids = [...document.querySelectorAll('.row-check:checked')].map(c => c.value);
+  ids.forEach(id => changeStatus(id, 'rejected'));
+  Toast.warning('Bulk Rejected', `${ids.length} requisitions rejected`);
+}
+
+/* ── STEP WIZARD ── */
+function nextStep() {
+  if (currentStep === 1) {
+    const title = document.getElementById('reqTitle').value;
+    const dept  = document.getElementById('reqDept').value;
+    const cat   = document.getElementById('reqCategory').value;
+    const prio  = document.getElementById('reqPriority').value;
+    const amount= document.getElementById('reqAmount').value;
+    const date  = document.getElementById('reqDate').value;
+    if (!title||!dept||!cat||!prio||!amount||!date) { Toast.warning('Validation','Please fill all required fields.'); return; }
+    currentStep = 2;
+  } else if (currentStep === 2) {
+    currentStep = 3;
+    buildReview();
+  } else if (currentStep === 3) {
+    if (!document.getElementById('declareCheck').checked) { Toast.warning('Declaration','Please tick the declaration checkbox.'); return; }
+    submitReq();
+    return;
+  }
+  updateStepUI();
+}
+
+function prevStep() {
+  if (currentStep > 1) { currentStep--; updateStepUI(); }
+}
+
+function updateStepUI() {
+  for (let i=1;i<=3;i++) {
+    document.getElementById(`stepPanel${i}`).style.display = i===currentStep?'':'none';
+    const s = document.getElementById(`step${i}`);
+    s.classList.remove('curr','done');
+    if (i < currentStep) s.classList.add('done');
+    else if (i === currentStep) s.classList.add('curr');
+    // Change dot for done steps
+    s.querySelector('.wf-dot').textContent = i < currentStep ? '✓' : i;
+  }
+  document.getElementById('prevBtn').style.display = currentStep > 1 ? '' : 'none';
+  document.getElementById('nextBtn').textContent = currentStep === 3 ? '✅ Submit Requisition' : 'Next →';
+}
+
+function updateApprovalInfo() {
+  const amt = parseFloat(document.getElementById('reqAmount').value) || 0;
+  const el  = document.getElementById('approvalInfo');
+  const txt = document.getElementById('approvalText');
+  if (amt <= 0) { el.style.display='none'; return; }
+  let approver, sla;
+  if (amt <= 5000)       { approver = 'Department Head'; sla = '24 hours'; }
+  else if (amt <= 25000) { approver = 'Finance Manager'; sla = '48 hours'; }
+  else if (amt <= 100000){ approver = 'Director'; sla = '72 hours'; }
+  else                   { approver = 'CEO / Board'; sla = '5 business days'; }
+  txt.textContent = `Amount RM ${Util.formatNum(amt)} → Requires approval from: ${approver} (SLA: ${sla})`;
+  el.style.display = 'block';
+}
+
+function addLineItem() {
+  const row = document.createElement('div');
+  row.className = 'line-item-row';
+  row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end';
+  row.innerHTML = `
+    <div><input class="form-control item-desc" placeholder="Item description"/></div>
+    <div><input type="number" class="form-control item-qty" value="1" min="1" onchange="calcLineTotal(this)"/></div>
+    <div><input type="number" class="form-control item-price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"/></div>
+    <div><input class="form-control item-total" readonly style="background:var(--bg)"/></div>
+    <div><button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.line-item-row').remove();updateItemsTotal()">✕</button></div>`;
+  document.getElementById('lineItems').appendChild(row);
+}
+
+function calcLineTotal(el) {
+  const row   = el.closest('.line-item-row');
+  const qty   = parseFloat(row.querySelector('.item-qty').value) || 0;
+  const price = parseFloat(row.querySelector('.item-price').value) || 0;
+  row.querySelector('.item-total').value = (qty * price).toFixed(2);
+  updateItemsTotal();
+}
+
+function updateItemsTotal() {
+  let total = 0;
+  document.querySelectorAll('.item-total').forEach(el => total += parseFloat(el.value)||0);
+  document.getElementById('itemsTotal').textContent = 'RM ' + total.toFixed(2);
+}
+
+function buildReview() {
+  const title  = document.getElementById('reqTitle').value;
+  const dept   = document.getElementById('reqDept').value;
+  const cat    = document.getElementById('reqCategory').value;
+  const prio   = document.getElementById('reqPriority').value;
+  const amount = document.getElementById('reqAmount').value;
+  const date   = document.getElementById('reqDate').value;
+  document.getElementById('reviewContent').innerHTML = `
+    <div class="form-row">
+      <div><span class="form-label">Title</span><div class="fw-500">${title}</div></div>
+      <div><span class="form-label">Department</span><div class="fw-500">${dept}</div></div>
+    </div>
+    <div class="form-row" style="margin-top:8px">
+      <div><span class="form-label">Category</span><div class="fw-500">${cat}</div></div>
+      <div><span class="form-label">Priority</span>${Badge.priority(prio)}</div>
+    </div>
+    <div class="form-row" style="margin-top:8px">
+      <div><span class="form-label">Est. Amount</span><div class="fw-500" style="color:var(--accent)">RM ${Util.formatNum(amount)}</div></div>
+      <div><span class="form-label">Required By</span><div class="fw-500">${Util.formatDate(date)}</div></div>
+    </div>`;
+}
+
+function submitReq() {
+  const reqs = Store.getRequisitions();
+  const user = Store.getUser();
+  const newReq = {
+    id:         'PR-2025-' + String(reqs.length + 200).padStart(4,'0'),
+    title:      document.getElementById('reqTitle').value,
+    dept:       document.getElementById('reqDept').value,
+    requester:  user?.name || 'Unknown',
+    amount:     parseFloat(document.getElementById('reqAmount').value),
+    status:     'pending',
+    priority:   document.getElementById('reqPriority').value,
+    category:   document.getElementById('reqCategory').value,
+    created:    Util.today(),
+    approvedBy: null,
+    items:      document.querySelectorAll('.line-item-row').length,
+  };
+  reqs.unshift(newReq);
+  Store.saveRequisitions(reqs);
+  Modal.close('newReqModal');
+  Toast.success('Submitted!', `${newReq.id} has been submitted for approval.`);
+  currentStep = 1;
+  document.getElementById('newReqForm').reset();
+  updateStepUI();
+  loadReqs();
+}
+</script>
+</body>
+</html>
