@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — P2P Solutions</title>
+  <title>Dashboard — TechMart</title>
   <link rel="stylesheet" href="css/main.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -23,14 +23,17 @@
           <div id="welcomeName" style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back!</div>
           <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong id="pendingCount" style="color:#fff">0</strong> pending approvals and <strong id="overdueCount" style="color:#FCD34D">0</strong> overdue invoices.</div>
         </div>
-        <div style="display:flex;gap:10px;position:relative;z-index:1;">
+        <div style="display:flex;gap:10px;position:relative;z-index:1;" id="welcomeActions">
           <a href="requisition.html" class="btn" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.2);backdrop-filter:blur(4px);">New Requisition</a>
           <a href="reports.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">View Reports</a>
         </div>
       </div>
 
+      <!-- Role-specific panel (buyer / seller) -->
+      <div id="rolePanel"></div>
+
       <!-- Stats Grid -->
-      <div class="stats-grid fade-up d1">
+      <div class="stats-grid fade-up d1" id="adminStats">
         <div class="stat-card">
           <div class="sic blue">📋</div>
           <div class="sinfo">
@@ -66,7 +69,7 @@
       </div>
 
       <!-- Charts Row -->
-      <div class="grid-2 mb-20 fade-up d2">
+      <div class="grid-2 mb-20 fade-up d2" id="chartsRow">
         <!-- Monthly Spend -->
         <div class="card">
           <div class="card-header">
@@ -99,7 +102,7 @@
       </div>
 
       <!-- Bottom Row -->
-      <div class="grid-2 fade-up d3">
+      <div class="grid-2 fade-up d3" id="approvalsRow">
         <!-- Pending Approvals -->
         <div class="card">
           <div class="card-header">
@@ -133,7 +136,7 @@
       </div>
 
       <!-- PO Status + Supplier Performance -->
-      <div class="grid-2 mt-8 fade-up d4" style="margin-top:14px">
+      <div class="grid-2 mt-8 fade-up d4" id="bottomRow" style="margin-top:14px">
         <div class="card">
           <div class="card-header">
             <div class="card-title">PO Status Distribution</div>
@@ -168,6 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Welcome
   document.getElementById('welcomeName').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
+
+  // Buyer & seller get their own tailored dashboards
+  if (user.role !== 'admin') { renderRoleDashboard(user); return; }
 
   // Stats
   const reqs = Store.getRequisitions();
@@ -242,6 +248,68 @@ document.addEventListener('DOMContentLoaded', () => {
   // Show welcome toast
   setTimeout(() => Toast.info('Dashboard Loaded', `Welcome, ${user.name}! ${pending} pending approvals.`), 600);
 });
+
+function renderRoleDashboard(user) {
+  // Hide all admin-only sections
+  ['adminStats', 'chartsRow', 'approvalsRow', 'bottomRow'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+
+  const orders = Store.getOrders();
+  const products = Store.getProducts();
+  const banner = document.getElementById('welcomeActions');
+  const panel = document.getElementById('rolePanel');
+
+  if (user.role === 'buyer') {
+    banner.innerHTML = `<a href="shop.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">🛍️ Go Shopping</a>`;
+    const mine = orders.filter(o => o.buyerId === user.id);
+    const spent = mine.reduce((s, o) => s + o.total, 0);
+    const open = mine.filter(o => !['completed', 'delivered'].includes(o.status)).length;
+    document.getElementById('overdueCount').parentElement.parentElement.innerHTML =
+      `<div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">Good to see you 👋</div>
+       <div style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back, ${user.name.split(' ')[0]}!</div>
+       <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong style="color:#fff">${mine.length}</strong> orders and <strong style="color:#FCD34D">${open}</strong> in progress.</div>`;
+    panel.innerHTML = `
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="sic blue">🧺</div><div class="sinfo"><div class="sval">${mine.length}</div><div class="slbl">My Orders</div></div></div>
+        <div class="stat-card"><div class="sic green">💰</div><div class="sinfo"><div class="sval">${Util.formatCurrency(spent)}</div><div class="slbl">Total Spent</div></div></div>
+        <div class="stat-card"><div class="sic cyan">🛍️</div><div class="sinfo"><div class="sval">${products.length}</div><div class="slbl">Products Available</div></div></div>
+      </div>
+      <div class="card fade-up d2" style="margin-top:18px">
+        <div class="card-header"><div class="card-title">Recent Orders</div><a href="orders.html" class="btn btn-sm btn-secondary">View All</a></div>
+        <div class="table-container"><table><thead><tr><th>Order</th><th>Product</th><th>Code</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>${mine.length ? mine.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td class="td-mono">${o.code}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td><td>${Util.formatDate(o.date)}</td></tr>`).join('') : '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🛍️</div><h4>No orders yet</h4><p>Head to the Shop to make your first purchase.</p></div></td></tr>'}</tbody></table></div>
+      </div>`;
+  } else { // seller
+    banner.innerHTML = `<a href="inventory.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">📦 Manage Inventory</a>`;
+    const mineProducts = products.filter(p => p.sellerId === user.id);
+    const myIds = new Set(mineProducts.map(p => p.id));
+    const incoming = orders.filter(o => myIds.has(o.productId));
+    const totalStock = mineProducts.reduce((s, p) => s + stockOf(p), 0);
+    const lowStock = mineProducts.filter(p => stockOf(p) <= 2);
+    document.getElementById('overdueCount').parentElement.parentElement.innerHTML =
+      `<div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">Seller dashboard 👋</div>
+       <div style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back, ${user.name.split(' ')[0]}!</div>
+       <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong style="color:#fff">${totalStock}</strong> units in stock and <strong style="color:#FCD34D">${lowStock.length}</strong> low-stock items.</div>`;
+    panel.innerHTML = `
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="sic blue">📦</div><div class="sinfo"><div class="sval">${mineProducts.length}</div><div class="slbl">My Products</div></div></div>
+        <div class="stat-card"><div class="sic green">✅</div><div class="sinfo"><div class="sval">${totalStock}</div><div class="slbl">Units In Stock</div></div></div>
+        <div class="stat-card"><div class="sic amber">🧾</div><div class="sinfo"><div class="sval">${incoming.length}</div><div class="slbl">Incoming Orders</div></div></div>
+      </div>
+      <div class="grid-2 fade-up d2" style="margin-top:18px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚠️ Low Stock Alerts</div><a href="inventory.html" class="btn btn-sm btn-secondary">Restock</a></div>
+          <div class="card-body">${lowStock.length ? lowStock.map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span>${p.emoji} ${p.name}</span><span class="stock-badge ${stockOf(p)===0?'out':'low'}">${stockOf(p)} left</span></div>`).join('') : '<div class="empty-state"><div class="empty-icon">✓</div><h4>All stocked up</h4></div>'}</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent Incoming Orders</div><a href="orders.html" class="btn btn-sm btn-secondary">View All</a></div>
+          <div class="card-body" style="padding:0"><div class="table-container"><table><thead><tr><th>Order</th><th>Product</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>${incoming.length ? incoming.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td></tr>`).join('') : '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🧾</div><h4>No orders yet</h4></div></td></tr>'}</tbody></table></div></div>
+        </div>
+      </div>`;
+  }
+}
 
 function approveItem(id) {
   const reqs = Store.getRequisitions();

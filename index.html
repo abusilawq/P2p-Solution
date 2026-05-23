@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login — P2P Solutions</title>
+  <title>Login — TechMart</title>
   <link rel="stylesheet" href="css/main.css"/>
   <style>
     body { background: #fff; }
@@ -21,17 +21,17 @@
   <!-- Left Brand Panel -->
   <div class="login-brand">
     <div class="login-brand-inner">
-      <div class="lb-logo">🔄</div>
-      <h1>Procure to Pay<br/>Solutions</h1>
-      <p>A fully integrated digital platform to automate your entire purchasing lifecycle — from requisition to final payment.</p>
+      <div class="lb-logo">🛒</div>
+      <h1>TechMart<br/>IT Marketplace</h1>
+      <p>Buy and sell IT products in one place — live stock, material-coded inventory, and a full procure-to-pay backend.</p>
 
       <div class="lb-features">
-        <div class="lb-feat"><div class="lb-feat-ico">📋</div>Automated Purchase Requisitions</div>
-        <div class="lb-feat"><div class="lb-feat-ico">🏢</div>Centralized Supplier Management</div>
-        <div class="lb-feat"><div class="lb-feat-ico">✅</div>Multi-Level Approval Workflows</div>
-        <div class="lb-feat"><div class="lb-feat-ico">🧾</div>Invoice Matching & Tracking</div>
-        <div class="lb-feat"><div class="lb-feat-ico">💳</div>Real-Time Payment Monitoring</div>
-        <div class="lb-feat"><div class="lb-feat-ico">📊</div>Analytics & Spending Reports</div>
+        <div class="lb-feat"><div class="lb-feat-ico">🛍️</div>Browse & Buy IT Products</div>
+        <div class="lb-feat"><div class="lb-feat-ico">📦</div>Live Stock & Material Codes</div>
+        <div class="lb-feat"><div class="lb-feat-ico">✏️</div>Seller Inventory Editing</div>
+        <div class="lb-feat"><div class="lb-feat-ico">🧾</div>Direct & Indirect Purchase Orders</div>
+        <div class="lb-feat"><div class="lb-feat-ico">💳</div>Order & Payment Tracking</div>
+        <div class="lb-feat"><div class="lb-feat-ico">📊</div>Admin Marketplace Analytics</div>
       </div>
 
       <div class="login-stats">
@@ -51,17 +51,17 @@
 
       <!-- Role Selector -->
       <div class="role-grid" id="roleGrid">
-        <div class="role-opt active" data-role="admin" onclick="selectRole(this)">
+        <div class="role-opt active" data-role="buyer" onclick="selectRole(this)">
+          <div class="role-ico">🛍️</div>
+          <div class="role-lbl">Buyer</div>
+        </div>
+        <div class="role-opt" data-role="seller" onclick="selectRole(this)">
+          <div class="role-ico">📦</div>
+          <div class="role-lbl">Seller</div>
+        </div>
+        <div class="role-opt" data-role="admin" onclick="selectRole(this)">
           <div class="role-ico">👑</div>
           <div class="role-lbl">Admin</div>
-        </div>
-        <div class="role-opt" data-role="procurement" onclick="selectRole(this)">
-          <div class="role-ico">🛒</div>
-          <div class="role-lbl">Procurement</div>
-        </div>
-        <div class="role-opt" data-role="finance" onclick="selectRole(this)">
-          <div class="role-ico">💰</div>
-          <div class="role-lbl">Finance</div>
         </div>
       </div>
 
@@ -96,17 +96,17 @@
       <div class="login-demo" style="margin-top:20px;">
         <div style="margin-bottom:8px;font-weight:600;color:var(--text-secondary);font-size:0.75rem">🔑 Demo Credentials</div>
         <div id="demoCards" style="display:flex;flex-direction:column;gap:6px;text-align:left;">
-          <div class="demo-card" onclick="fillDemo('sarah.chen@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''"">
+          <div class="demo-card" onclick="fillDemo('buyer@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">🛍️ Buyer:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> buyer@shop.com / pass123</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('seller@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">📦 Seller:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> seller@shop.com / pass123</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('admin@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
             <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">👑 Admin:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> sarah.chen@acme.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('james.r@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">🛒 Procurement:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> james.r@acme.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('priya.n@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">💰 Finance:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> priya.n@acme.com / pass123</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> admin@shop.com / pass123</span>
           </div>
         </div>
       </div>
@@ -127,7 +127,8 @@
     if (existing) window.location.href = 'dashboard.html';
   } catch(e) {}
 
-  let selectedRole = 'admin';
+  let selectedRole = 'buyer';
+  const demos = { admin: 'admin@shop.com', buyer: 'buyer@shop.com', seller: 'seller@shop.com' };
 
   function selectRole(el) {
     document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('active'));
@@ -135,7 +136,6 @@
     selectedRole = el.dataset.role;
 
     // Auto-fill demo email based on role
-    const demos = { admin: 'sarah.chen@acme.com', procurement: 'james.r@acme.com', finance: 'priya.n@acme.com' };
     document.getElementById('loginEmail').value = demos[selectedRole] || '';
     document.getElementById('loginPassword').value = 'pass123';
   }
@@ -184,8 +184,8 @@
     }, 800);
   }
 
-  // Auto-fill admin on load
-  document.getElementById('loginEmail').value = 'sarah.chen@acme.com';
+  // Auto-fill buyer on load
+  document.getElementById('loginEmail').value = 'buyer@shop.com';
   document.getElementById('loginPassword').value = 'pass123';
 </script>
 </body>

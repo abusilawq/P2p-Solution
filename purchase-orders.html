@@ -39,12 +39,17 @@
               <span class="si">🔍</span>
               <input class="form-control" id="poSearch" placeholder="Search POs…" oninput="filterTable('poSearch','poTable')"/>
             </div>
-            <select class="fsel" onchange="filterPOs(this.value)" id="poStatusFilter">
+            <select class="fsel" onchange="applyFilters()" id="poStatusFilter">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed</option>
               <option value="in_transit">In Transit</option>
               <option value="delivered">Delivered</option>
+            </select>
+            <select class="fsel" onchange="applyFilters()" id="poTypeFilter">
+              <option value="">All Types</option>
+              <option value="direct">Direct PO</option>
+              <option value="indirect">Indirect PO</option>
             </select>
           </div>
         </div>
@@ -53,6 +58,7 @@
             <thead>
               <tr>
                 <th>PO Number</th>
+                <th>Type</th>
                 <th>PR Reference</th>
                 <th>Supplier</th>
                 <th>Amount</th>
@@ -87,8 +93,23 @@
       <form id="poForm">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label req">Link to Requisition</label>
-            <select class="form-control" id="poReqId" required onchange="autoFill()">
+            <label class="form-label req">PO Type</label>
+            <select class="form-control" id="poType" required onchange="onTypeChange()">
+              <option value="direct">Direct PO — resale goods (needs material code)</option>
+              <option value="indirect">Indirect PO — services / office (no material code)</option>
+            </select>
+          </div>
+          <div class="form-group" id="materialCodeGroup">
+            <label class="form-label">Product / Material Code</label>
+            <select class="form-control" id="poMaterial">
+              <option value="">Select product…</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Link to Requisition</label>
+            <select class="form-control" id="poReqId" onchange="autoFill()">
               <option value="">Select approved requisition…</option>
             </select>
           </div>
@@ -147,6 +168,7 @@ let allPOs = [];
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('purchaseOrders', 'Purchase Orders', 'Purchase Orders');
   if (!user) return;
+  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
   loadPOs();
   populateDropdowns();
   document.getElementById('poDelivery').min = Util.today();
@@ -169,13 +191,14 @@ function updateStats(data) {
 function renderPOs(data) {
   const tbody = document.getElementById('poTableBody');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📦</div><h4>No POs yet</h4></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📦</div><h4>No POs yet</h4></div></td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(po => `
     <tr>
       <td class="td-mono">${po.id}</td>
-      <td class="td-mono" style="color:var(--text-muted)">${po.prId}</td>
+      <td>${Badge.status(po.type || 'direct')}</td>
+      <td class="td-mono" style="color:var(--text-muted)">${po.prId || '—'}${po.materialCode ? '<br><span style="color:var(--accent)">'+po.materialCode+'</span>' : ''}</td>
       <td class="td-primary">${po.supplier.length>25?po.supplier.substring(0,25)+'…':po.supplier}</td>
       <td style="font-weight:500">${Util.formatCurrency(po.amount)}</td>
       <td>${Badge.status(po.status)}</td>
@@ -196,8 +219,18 @@ function renderPOs(data) {
     </tr>`).join('');
 }
 
-function filterPOs(status) {
-  renderPOs(status ? allPOs.filter(p => p.status === status) : allPOs);
+function applyFilters() {
+  const status = document.getElementById('poStatusFilter').value;
+  const type   = document.getElementById('poTypeFilter').value;
+  renderPOs(allPOs.filter(p =>
+    (!status || p.status === status) &&
+    (!type || (p.type || 'direct') === type)
+  ));
+}
+
+function onTypeChange() {
+  const isDirect = document.getElementById('poType').value === 'direct';
+  document.getElementById('materialCodeGroup').style.display = isDirect ? '' : 'none';
 }
 
 function populateDropdowns() {
@@ -218,6 +251,17 @@ function populateDropdowns() {
     opt.textContent = s.name;
     supSel.appendChild(opt);
   });
+
+  const matSel = document.getElementById('poMaterial');
+  Store.getProducts().forEach(p => {
+    (p.units || []).forEach(u => {
+      if (u.status !== 'in_stock') return;
+      const opt = document.createElement('option');
+      opt.value = u.code;
+      opt.textContent = `${u.code} — ${p.name}`;
+      matSel.appendChild(opt);
+    });
+  });
 }
 
 function autoFill() {
@@ -227,26 +271,31 @@ function autoFill() {
 }
 
 function createPO() {
+  const type     = document.getElementById('poType').value;
+  const material = document.getElementById('poMaterial').value;
   const reqId    = document.getElementById('poReqId').value;
   const supId    = document.getElementById('poSupplier').value;
   const amount   = parseFloat(document.getElementById('poAmount').value);
   const delivery = document.getElementById('poDelivery').value;
-  if (!reqId||!supId||!amount||!delivery) { Toast.warning('Validation','Fill all required fields.'); return; }
+  if (!supId||!amount||!delivery) { Toast.warning('Validation','Fill all required fields.'); return; }
+  if (type === 'direct' && !material) { Toast.warning('Validation','Direct POs need a product / material code.'); return; }
 
   const sup     = Store.getSuppliers().find(s=>s.id===supId);
   const pos     = Store.getPOs();
   const user    = Store.getUser();
   const newPO   = {
-    id:         'PO-2025-' + String(pos.length + 100).padStart(4,'0'),
-    prId:       reqId,
-    supplier:   sup?.name || 'Unknown',
+    id:           'PO-2025-' + String(pos.length + 100).padStart(4,'0'),
+    type,
+    materialCode: type === 'direct' ? material : null,
+    prId:         reqId || null,
+    supplier:     sup?.name || 'Unknown',
     supId,
     amount,
-    status:     'confirmed',
-    created:    Util.today(),
+    status:       'confirmed',
+    created:      Util.today(),
     delivery,
-    approvedBy: user?.name,
-    payStatus:  'pending',
+    approvedBy:   user?.name,
+    payStatus:    'pending',
   };
   pos.unshift(newPO);
   Store.savePOs(pos);
@@ -289,8 +338,11 @@ function viewPO(id) {
       </div>
     </div>
     <div style="padding:14px;background:var(--bg);border-radius:8px">
-      <div class="form-label">Linked Requisition</div>
-      <div class="td-mono">${po.prId}</div>
+      <div class="form-label">PO Type</div>
+      <div>${Badge.status(po.type || 'direct')}</div>
+      ${po.materialCode ? `<div class="form-label" style="margin-top:8px">Material Code</div><div class="td-mono">${po.materialCode}</div>` : ''}
+      <div class="form-label" style="margin-top:8px">Linked Requisition</div>
+      <div class="td-mono">${po.prId || '—'}</div>
       <div class="form-label" style="margin-top:8px">Approved By</div>
       <div>${po.approvedBy||'Pending approval'}</div>
     </div>`;

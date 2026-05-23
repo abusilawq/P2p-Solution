@@ -272,9 +272,9 @@
             <label class="form-label req">Role</label>
             <select class="form-control" name="role" required>
               <option value="">Select...</option>
+              <option value="buyer">Buyer</option>
+              <option value="seller">Seller (Supplier)</option>
               <option value="admin">Admin</option>
-              <option value="procurement">Procurement Staff</option>
-              <option value="finance">Finance Team</option>
             </select>
           </div>
           <div class="form-group">
@@ -321,7 +321,7 @@ const user = initPage('admin', 'Admin Panel', ['Home', 'Admin']);
 
 // Restrict to admin role
 if (user && user.role !== 'admin') {
-  Toast.warning('Access Restricted', 'Admin privileges required');
+  window.location.href = 'dashboard.html';
 }
 
 // Tab switching
@@ -337,8 +337,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 let allUsers = [...P2PData.users];
 
 function renderUsers(list = allUsers) {
-  const roleLabel = { admin: 'Administrator', procurement: 'Procurement Staff', finance: 'Finance Team' };
-  const roleBadge = { admin: 'badge-purple', procurement: 'badge-primary', finance: 'badge-info' };
+  const roleLabel = { admin: 'Administrator', buyer: 'Buyer', seller: 'Seller (Supplier)' };
+  const roleBadge = { admin: 'badge-purple', buyer: 'badge-primary', seller: 'badge-warning' };
   document.getElementById('usersTbody').innerHTML = list.length ? list.map(u => `
     <tr>
       <td>

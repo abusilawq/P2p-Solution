@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Purchase Requisitions — P2P Solutions</title>
+  <title>Purchase Requisitions — TechMart</title>
   <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
@@ -62,6 +62,7 @@
               <tr>
                 <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"/></th>
                 <th>Req. ID</th>
+                <th>Type</th>
                 <th>Title</th>
                 <th>Department</th>
                 <th>Requester</th>
@@ -106,6 +107,13 @@
       <form id="newReqForm">
         <!-- Step 1: Basic Details -->
         <div id="stepPanel1">
+          <div class="form-group">
+            <label class="form-label req">Requisition Type</label>
+            <select class="form-control" id="reqType" required>
+              <option value="direct">Direct — resale goods (needs material code)</option>
+              <option value="indirect">Indirect — software / services / office supplies</option>
+            </select>
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label req">Requisition Title</label>
@@ -233,6 +241,7 @@ let currentStep = 1;
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('requisition', 'Purchase Requisitions', 'Requisitions');
   if (!user) return;
+  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
   loadReqs();
   // Set min date
   document.getElementById('reqDate').min = Util.today();
@@ -255,13 +264,14 @@ function updateStats(data) {
 function renderReqs(data) {
   const tbody = document.getElementById('reqTableBody');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><h4>No requisitions found</h4><p>Create your first requisition</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📋</div><h4>No requisitions found</h4><p>Create your first requisition</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(r => `
     <tr>
       <td><input type="checkbox" class="row-check" value="${r.id}"/></td>
       <td class="td-mono">${r.id}</td>
+      <td>${Badge.status(r.type || 'direct')}</td>
       <td class="td-primary" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
       <td>${r.dept}</td>
       <td>${r.requester}</td>
@@ -322,7 +332,11 @@ function viewDetail(id) {
   document.getElementById('detailContent').innerHTML = `
     <div class="form-row" style="margin-bottom:12px">
       <div><div class="form-label">Status</div>${Badge.status(r.status)}</div>
+      <div><div class="form-label">Type</div>${Badge.status(r.type || 'direct')}</div>
+    </div>
+    <div class="form-row" style="margin-bottom:12px">
       <div><div class="form-label">Priority</div>${Badge.priority(r.priority)}</div>
+      <div><div class="form-label">Category</div><div class="fw-500">${r.category}</div></div>
     </div>
     <div class="form-row">
       <div><div class="form-label">Department</div><div class="fw-500">${r.dept}</div></div>
@@ -478,6 +492,7 @@ function submitReq() {
   const user = Store.getUser();
   const newReq = {
     id:         'PR-2025-' + String(reqs.length + 200).padStart(4,'0'),
+    type:       document.getElementById('reqType').value,
     title:      document.getElementById('reqTitle').value,
     dept:       document.getElementById('reqDept').value,
     requester:  user?.name || 'Unknown',

@@ -59,9 +59,9 @@ function writeDB(data) {
 
 // ── AUTH ───────────────────────────────────────────────────
 const VALID_USERS = [
-  { id: 'u001', name: 'Sarah Chen',    email: 'sarah.chen@acme.com', password: 'pass123', role: 'admin'       },
-  { id: 'u002', name: 'James Rivera',  email: 'james.r@acme.com',    password: 'pass123', role: 'procurement' },
-  { id: 'u003', name: 'Priya Nair',    email: 'priya.n@acme.com',    password: 'pass123', role: 'finance'     },
+  { id: 'u-admin',  name: 'Sarah Chen',   email: 'admin@shop.com',  password: 'pass123', role: 'admin'  },
+  { id: 'u-buyer',  name: 'James Rivera',  email: 'buyer@shop.com',  password: 'pass123', role: 'buyer'  },
+  { id: 'u-seller', name: 'Priya Nair',   email: 'seller@shop.com', password: 'pass123', role: 'seller' },
 ];
 
 app.post('/api/auth/login', (req, res) => {
@@ -124,6 +124,8 @@ crudRoutes('requisitions',   'PR');
 crudRoutes('purchaseOrders', 'PO');
 crudRoutes('invoices',       'INV');
 crudRoutes('payments',       'PAY');
+crudRoutes('products',       'P');
+crudRoutes('orders',         'ORD');
 
 // ── WORKFLOW ACTIONS ───────────────────────────────────────
 app.post('/api/requisitions/:id/approve', (req, res) => {

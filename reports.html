@@ -187,6 +187,7 @@
 <script src="js/utils.js"></script>
 <script>
 const user = initPage('reports', 'Reports & Analytics', ['Home', 'Reports']);
+if (user && user.role !== 'admin') { window.location.href = 'dashboard.html'; }
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
