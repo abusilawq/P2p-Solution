@@ -62,7 +62,14 @@ const VALID_USERS = [
   { id: 'u-admin', name: 'Sarah Chen',   email: 'admin@acme.com',       password: 'pass123', role: 'admin'       },
   { id: 'u-proc',  name: 'James Rivera',  email: 'procurement@acme.com', password: 'pass123', role: 'procurement' },
   { id: 'u-fin',   name: 'Priya Nair',   email: 'finance@acme.com',     password: 'pass123', role: 'finance'     },
-  { id: 'u-sup',   name: 'Ali Hassan',   email: 'supplier@techcore.my', password: 'pass123', role: 'supplier'    },
+  { id: 'u-apple',   name: 'Apple Store',    email: 'apple@supplier.com',   password: 'pass123', role: 'supplier' },
+  { id: 'u-samsung', name: 'Samsung Sales',  email: 'samsung@supplier.com', password: 'pass123', role: 'supplier' },
+  { id: 'u-asus',    name: 'ASUS Reseller',  email: 'asus@supplier.com',    password: 'pass123', role: 'supplier' },
+  { id: 'u-hp',      name: 'HP Distributor', email: 'hp@supplier.com',      password: 'pass123', role: 'supplier' },
+  { id: 'u-xiaomi',  name: 'Xiaomi Official', email: 'xiaomi@supplier.com', password: 'pass123', role: 'supplier' },
+  { id: 'u-huawei',  name: 'Huawei Partner', email: 'huawei@supplier.com',  password: 'pass123', role: 'supplier' },
+  { id: 'u-lenovo',  name: 'Lenovo Store',   email: 'lenovo@supplier.com',  password: 'pass123', role: 'supplier' },
+  { id: 'u-sony',    name: 'Sony Centre',    email: 'sony@supplier.com',    password: 'pass123', role: 'supplier' },
 ];
 
 app.post('/api/auth/login', (req, res) => {

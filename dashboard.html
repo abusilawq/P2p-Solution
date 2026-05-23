@@ -292,14 +292,21 @@ function renderRoleDashboard(user) {
     const incoming = orders.filter(o => myIds.has(o.productId));
     const totalStock = mineProducts.reduce((s, p) => s + stockOf(p), 0);
     const lowStock = mineProducts.filter(p => stockOf(p) <= 2);
-    setBanner('Supplier dashboard 👋', `You have <strong style="color:#fff">${totalStock}</strong> units in stock and <strong style="color:#FCD34D">${lowStock.length}</strong> low-stock items.`);
+    const revenue = incoming.reduce((s, o) => s + o.total, 0);
+    const brand = user.brandName || 'Supplier';
+    setBanner(`${brand} supplier dashboard 👋`, `You have <strong style="color:#fff">${totalStock}</strong> units in stock, <strong style="color:#FCD34D">${lowStock.length}</strong> low-stock items and <strong style="color:#fff">${Util.formatCurrency(revenue)}</strong> in sales.`);
     panel.innerHTML = `
-      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card"><div class="sic blue">📦</div><div class="sinfo"><div class="sval">${mineProducts.length}</div><div class="slbl">My Products</div></div></div>
         <div class="stat-card"><div class="sic green">✅</div><div class="sinfo"><div class="sval">${totalStock}</div><div class="slbl">Units In Stock</div></div></div>
         <div class="stat-card"><div class="sic amber">🧾</div><div class="sinfo"><div class="sval">${incoming.length}</div><div class="slbl">Incoming Orders</div></div></div>
+        <div class="stat-card"><div class="sic purple">💰</div><div class="sinfo"><div class="sval">${Util.formatCurrency(revenue)}</div><div class="slbl">Sales Revenue</div></div></div>
       </div>
-      <div class="grid-2 fade-up d2" style="margin-top:18px">
+      <div class="card fade-up d2" style="margin-top:18px">
+        <div class="card-header"><div class="card-title">Stock by Product</div><span class="badge badge-primary">${brand}</span></div>
+        <div class="card-body"><div class="chart-wrap short"><canvas id="supStockChart"></canvas></div></div>
+      </div>
+      <div class="grid-2 fade-up d3" style="margin-top:14px">
         <div class="card">
           <div class="card-header"><div class="card-title">⚠️ Low Stock Alerts</div><a href="inventory.html" class="btn btn-sm btn-secondary">Restock</a></div>
           <div class="card-body">${lowStock.length ? lowStock.map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span>${p.emoji} ${p.name}</span><span class="stock-badge ${stockOf(p)===0?'out':'low'}">${stockOf(p)} left</span></div>`).join('') : '<div class="empty-state"><div class="empty-icon">✓</div><h4>All stocked up</h4></div>'}</div>
@@ -310,6 +317,14 @@ function renderRoleDashboard(user) {
           <tbody>${incoming.length ? incoming.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td></tr>`).join('') : '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🧾</div><h4>No orders yet</h4></div></td></tr>'}</tbody></table></div></div>
         </div>
       </div>`;
+    if (typeof Chart !== 'undefined' && mineProducts.length) {
+      chartDefaults();
+      new Chart(document.getElementById('supStockChart').getContext('2d'), {
+        type: 'bar',
+        data: { labels: mineProducts.map(p => p.name), datasets: [{ label: 'In stock', data: mineProducts.map(stockOf), backgroundColor: 'rgba(37,99,235,0.6)', borderRadius: 5 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#F1F5F9' }, beginAtZero: true } } }
+      });
+    }
   } else { // finance
     banner.innerHTML = `<a href="reports.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">📊 View Reports</a>`;
     const invoices = Store.getInvoices();

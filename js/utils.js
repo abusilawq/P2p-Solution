@@ -154,7 +154,7 @@ const Sidebar = {
       const uav   = document.getElementById('sidebarUserAvatar');
       const uinit = document.getElementById('sidebarUserInitials');
       if (uname)  uname.textContent  = user.name;
-      if (urole)  urole.textContent  = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+      if (urole)  urole.textContent  = user.brandName ? user.brandName + ' · Supplier' : user.role.charAt(0).toUpperCase() + user.role.slice(1);
       if (uav)    uav.style.background = user.avatar;
       if (uinit)  uinit.textContent  = user.initials;
 
