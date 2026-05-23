@@ -15,27 +15,31 @@ function _genUnits(prefix, total, sold = 0) {
 const P2PData = {
 
   /* ── AUTH ──────────────────────────────────────────────── */
+  /* Two businesses: ACME (the buyer org) and TechCore (a supplier) — true B2B */
   users: [
-    { id: 'u-admin',  name: 'Sarah Chen',   email: 'admin@shop.com',  password: 'pass123', role: 'admin',  dept: 'Marketplace Admin', avatar: '#2563EB', initials: 'SC' },
-    { id: 'u-buyer',  name: 'James Rivera',  email: 'buyer@shop.com',  password: 'pass123', role: 'buyer',  dept: 'Procurement',       avatar: '#10B981', initials: 'JR' },
-    { id: 'u-seller', name: 'Priya Nair',   email: 'seller@shop.com', password: 'pass123', role: 'seller', dept: 'IT Supplies',       avatar: '#F59E0B', initials: 'PN' },
+    { id: 'u-admin', name: 'Sarah Chen',   email: 'admin@acme.com',       password: 'pass123', role: 'admin',       dept: 'IT Administration',  avatar: '#2563EB', initials: 'SC' },
+    { id: 'u-proc',  name: 'James Rivera',  email: 'procurement@acme.com', password: 'pass123', role: 'procurement', dept: 'Procurement',         avatar: '#10B981', initials: 'JR' },
+    { id: 'u-fin',   name: 'Priya Nair',   email: 'finance@acme.com',     password: 'pass123', role: 'finance',     dept: 'Finance & Accounts', avatar: '#F59E0B', initials: 'PN' },
+    { id: 'u-sup',   name: 'Ali Hassan',   email: 'supplier@techcore.my', password: 'pass123', role: 'supplier',    dept: 'TechCore Solutions', avatar: '#8B5CF6', initials: 'AH', supplierId: 'SUP-001' },
   ],
 
   /* ── PRODUCTS / INVENTORY (Direct PO resale goods) ─────── */
   products: [
-    { id: 'P-AL', category: 'Laptops',     brand: 'Asus',     name: 'Asus Laptop',         emoji: '💻', materialPrefix: 'AL', price: 3200, sellerId: 'u-seller', units: _genUnits('AL', 10, 0) },
-    { id: 'P-DL', category: 'Laptops',     brand: 'Dell',     name: 'Dell Laptop',         emoji: '💻', materialPrefix: 'DL', price: 3800, sellerId: 'u-seller', units: _genUnits('DL', 6, 1)  },
-    { id: 'P-SP', category: 'Phones',      brand: 'Samsung',  name: 'Samsung Galaxy Phone',emoji: '📱', materialPrefix: 'SP', price: 2400, sellerId: 'u-seller', units: _genUnits('SP', 8, 2)  },
-    { id: 'P-AP', category: 'Phones',      brand: 'Apple',    name: 'Apple iPhone',        emoji: '📱', materialPrefix: 'AP', price: 4500, sellerId: 'u-seller', units: _genUnits('AP', 5, 0)  },
-    { id: 'P-LM', category: 'Accessories', brand: 'Logitech', name: 'Logitech Mouse',      emoji: '🖱️', materialPrefix: 'LM', price: 120,  sellerId: 'u-seller', units: _genUnits('LM', 12, 3) },
-    { id: 'P-AC', category: 'Accessories', brand: 'Anker',    name: 'Anker Fast Charger',  emoji: '🔌', materialPrefix: 'AC', price: 90,   sellerId: 'u-seller', units: _genUnits('AC', 4, 4)  },
+    { id: 'P-AL', category: 'Laptops',     brand: 'Asus',     name: 'Asus ProBook Laptop',  emoji: '💻', image: 'assets/products/laptop.svg',   materialPrefix: 'AL', price: 3200, sellerId: 'u-sup', units: _genUnits('AL', 10, 0) },
+    { id: 'P-DL', category: 'Laptops',     brand: 'Dell',     name: 'Dell Latitude Laptop', emoji: '💻', image: 'assets/products/laptop.svg',   materialPrefix: 'DL', price: 3800, sellerId: 'u-sup', units: _genUnits('DL', 6, 1)  },
+    { id: 'P-SP', category: 'Phones',      brand: 'Samsung',  name: 'Samsung Galaxy Phone', emoji: '📱', image: 'assets/products/phone.svg',    materialPrefix: 'SP', price: 2400, sellerId: 'u-sup', units: _genUnits('SP', 8, 2)  },
+    { id: 'P-AP', category: 'Phones',      brand: 'Apple',    name: 'Apple iPhone',         emoji: '📱', image: 'assets/products/phone.svg',    materialPrefix: 'AP', price: 4500, sellerId: 'u-sup', units: _genUnits('AP', 5, 0)  },
+    { id: 'P-MN', category: 'Monitors',    brand: 'Dell',     name: 'Dell 27" Monitor',     emoji: '🖥️', image: 'assets/products/monitor.svg',  materialPrefix: 'MN', price: 950,  sellerId: 'u-sup', units: _genUnits('MN', 7, 1)  },
+    { id: 'P-KB', category: 'Accessories', brand: 'Logitech', name: 'Logitech Keyboard',    emoji: '⌨️', image: 'assets/products/keyboard.svg', materialPrefix: 'KB', price: 180,  sellerId: 'u-sup', units: _genUnits('KB', 14, 4) },
+    { id: 'P-LM', category: 'Accessories', brand: 'Logitech', name: 'Logitech Wireless Mouse', emoji: '🖱️', image: 'assets/products/mouse.svg', materialPrefix: 'LM', price: 120,  sellerId: 'u-sup', units: _genUnits('LM', 12, 3) },
+    { id: 'P-AC', category: 'Accessories', brand: 'Anker',    name: 'Anker Fast Charger',   emoji: '🔌', image: 'assets/products/charger.svg',  materialPrefix: 'AC', price: 90,   sellerId: 'u-sup', units: _genUnits('AC', 4, 4)  },
   ],
 
-  /* ── ORDERS (buyer purchases) ──────────────────────────── */
+  /* ── ORDERS (procurement purchases from suppliers) ─────── */
   orders: [
-    { id: 'ORD-1001', buyerId: 'u-buyer', productId: 'P-AL', productName: 'Asus Laptop',  code: 'AL 001', qty: 1, price: 3200, total: 3200, status: 'delivered', date: '2026-05-10' },
-    { id: 'ORD-1002', buyerId: 'u-buyer', productId: 'P-SP', productName: 'Samsung Galaxy Phone', code: 'SP 001', qty: 1, price: 2400, total: 2400, status: 'in_transit', date: '2026-05-18' },
-    { id: 'ORD-1003', buyerId: 'u-buyer', productId: 'P-LM', productName: 'Logitech Mouse', code: 'LM 001', qty: 1, price: 120, total: 120, status: 'completed', date: '2026-05-20' },
+    { id: 'ORD-1001', buyerId: 'u-proc', productId: 'P-AL', productName: 'Asus ProBook Laptop',  code: 'AL 001', qty: 1, price: 3200, total: 3200, status: 'delivered', date: '2026-05-10' },
+    { id: 'ORD-1002', buyerId: 'u-proc', productId: 'P-SP', productName: 'Samsung Galaxy Phone', code: 'SP 001', qty: 1, price: 2400, total: 2400, status: 'in_transit', date: '2026-05-18' },
+    { id: 'ORD-1003', buyerId: 'u-proc', productId: 'P-LM', productName: 'Logitech Wireless Mouse', code: 'LM 001', qty: 1, price: 120, total: 120, status: 'completed', date: '2026-05-20' },
   ],
 
   /* ── SUPPLIERS ─────────────────────────────────────────── */

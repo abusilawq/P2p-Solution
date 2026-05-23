@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shop — TechMart</title>
+  <title>Catalog — P2P Solutions</title>
   <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
@@ -15,8 +15,8 @@
 
       <div class="page-header fade-up">
         <div>
-          <h2>Shop</h2>
-          <p>Browse and buy IT products — live stock updated in real time</p>
+          <h2>Supplier Catalog</h2>
+          <p>Browse supplier stock and raise an order — live stock updated in real time</p>
         </div>
         <div class="page-header-actions">
           <div class="search-bar" style="width:240px">
@@ -54,9 +54,9 @@ let products = [];
 let activeCat = 'All';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const user = initPage('shop', 'Shop', 'Shop');
+  const user = initPage('shop', 'Supplier Catalog', 'Catalog');
   if (!user) return;
-  if (!['buyer', 'admin'].includes(user.role)) { window.location.href = 'dashboard.html'; return; }
+  if (!['procurement', 'admin'].includes(user.role)) { window.location.href = 'dashboard.html'; return; }
   products = Store.getProducts();
   renderCats();
   renderShop();
@@ -73,6 +73,7 @@ function setCat(c) { activeCat = c; renderCats(); renderShop(); }
 
 function stockClass(n) { return n === 0 ? 'out' : n <= 2 ? 'low' : 'ok'; }
 function stockLabel(n) { return n === 0 ? 'Out of stock' : `${n} in stock`; }
+function imgTag(p) { return p.image ? `<img src="${p.image}" alt="${p.name}"/>` : p.emoji; }
 
 function renderShop() {
   const q = (document.getElementById('shopSearch').value || '').toLowerCase();
@@ -89,7 +90,7 @@ function renderShop() {
     const n = stockOf(p);
     return `
     <div class="product-card" onclick="openProduct('${p.id}')">
-      <div class="product-img">${p.emoji}</div>
+      <div class="product-img">${imgTag(p)}</div>
       <div class="product-info">
         <div class="product-brand">${p.brand}</div>
         <div class="product-name">${p.name}</div>
@@ -108,7 +109,7 @@ function openProduct(id) {
   document.getElementById('pmTitle').textContent = p.name;
   document.getElementById('pmBody').innerHTML = `
     <div style="display:flex;gap:20px;flex-wrap:wrap">
-      <div style="font-size:5rem;flex-shrink:0">${p.emoji}</div>
+      <div style="width:200px;height:150px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F8FAFC">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:5rem;text-align:center;line-height:150px">${p.emoji}</div>`}</div>
       <div style="flex:1;min-width:200px">
         <div class="product-brand">${p.brand} · ${p.category}</div>
         <div style="font-size:1.2rem;font-weight:700;margin:4px 0">${p.name}</div>
@@ -122,11 +123,11 @@ function openProduct(id) {
     </div>`;
   document.getElementById('pmFooter').innerHTML = `
     <button class="btn btn-secondary" onclick="Modal.close('productModal')">Close</button>
-    <button class="btn btn-shop" ${n === 0 ? 'disabled' : ''} onclick="buyProduct('${p.id}')">🛒 Buy Now</button>`;
+    <button class="btn btn-primary" ${n === 0 ? 'disabled' : ''} onclick="raisePO('${p.id}')">🧾 Raise Purchase Order</button>`;
   Modal.open('productModal');
 }
 
-function buyProduct(id) {
+function raisePO(id) {
   const all = Store.getProducts();
   const p = all.find(x => x.id === id);
   const unit = p && p.units.find(u => u.status === 'in_stock');
@@ -135,10 +136,12 @@ function buyProduct(id) {
   Store.saveProducts(all);
 
   const user = Store.getUser();
+  const seller = P2PData.users.find(u => u.id === p.sellerId);
   const orders = Store.getOrders();
   orders.unshift({
     id: 'ORD-' + Date.now().toString().slice(-6),
-    buyerId: user.id, productId: p.id, productName: p.name,
+    type: 'direct', buyerId: user.id, supplierId: seller ? seller.supplierId : null,
+    productId: p.id, productName: p.name,
     code: unit.code, qty: 1, price: p.price, total: p.price,
     status: 'confirmed', date: Util.today(),
   });
@@ -146,7 +149,7 @@ function buyProduct(id) {
 
   products = all;
   Modal.close('productModal');
-  Toast.success('Order placed', `${p.name} (${unit.code}) purchased for ${Util.formatCurrency(p.price)}.`);
+  Toast.success('Purchase Order raised', `Direct PO for ${p.name} (${unit.code}) — ${Util.formatCurrency(p.price)} sent to the supplier.`);
   renderShop();
 }
 </script>

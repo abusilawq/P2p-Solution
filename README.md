@@ -10,15 +10,18 @@ A complete, production-grade web platform that digitalizes the **entire purchasi
 
 ## Live Demo Login
 
-| Role         | Email             | Password   | Can do                                         |
-|--------------|-------------------|------------|------------------------------------------------|
-| **Buyer**    | buyer@shop.com    | `pass123`  | Browse the shop, buy products, track orders    |
-| **Seller**   | seller@shop.com   | `pass123`  | Edit live stock & material codes, view incoming orders |
-| **Admin**    | admin@shop.com    | `pass123`  | Everything — shop, inventory, full procurement |
+A **B2B Procure-to-Pay** platform between two businesses — **ACME** (the buyer org) and **TechCore** (a supplier).
+
+| Role            | Email                   | Password  | Can do                                                  |
+|-----------------|-------------------------|-----------|---------------------------------------------------------|
+| **Procurement** | procurement@acme.com    | `pass123` | Browse the supplier catalog, raise requisitions & POs, track orders |
+| **Supplier**    | supplier@techcore.my    | `pass123` | Manage live inventory & material codes, fulfil incoming orders |
+| **Finance**     | finance@acme.com        | `pass123` | Invoices, payments, spend reports                       |
+| **Admin**       | admin@acme.com          | `pass123` | Everything — catalog, inventory, full procure-to-pay    |
 
 > *Or just click any of the demo accounts pre-filled on the login screen.*
 
-Each role sees its **own panel** — the sidebar and dashboard are filtered to that role.
+The site opens on a **public catalog landing page**; logging in routes each role to its **own panel** — the sidebar and dashboard are filtered to that role.
 
 ---
 
@@ -50,10 +53,11 @@ npx http-server -p 3000 -c-1
 
 ```
 p2p-solution/
-├── index.html              ← Login / Authentication entry (buyer · seller · admin)
-├── dashboard.html          ← Role-aware dashboard (buyer / seller / admin views)
-├── shop.html               ← Shopee-style storefront — browse & buy IT products
-├── inventory.html          ← Live stock & material codes — editable storage
+├── index.html              ← Public B2B landing page + product catalog (no login)
+├── login.html              ← Login / Authentication (procurement · supplier · finance · admin)
+├── dashboard.html          ← Role-aware dashboard (one per role)
+├── shop.html               ← Supplier catalog — browse & raise purchase orders
+├── inventory.html          ← Live stock & material codes — editable storage (supplier)
 ├── orders.html             ← Order tracking (my orders / incoming / all)
 ├── requisition.html        ← Purchase Requisition module (Direct / Indirect)
 ├── purchase-orders.html    ← PO management
@@ -83,29 +87,30 @@ p2p-solution/
 
 ## Modules — What Each Page Does
 
-### 1. Login (`index.html`)
-Role-based authentication with three user types: **Admin**, **Procurement Staff**, **Finance Team**. Includes demo credential auto-fill and brand showcase panel.
+### 0. Landing (`index.html`)
+Public B2B home page — hero, a browse-only **product catalog** (with images & live stock), B2B
+feature highlights and a "how it works" flow. No login needed; "Login to Order" leads to `login.html`.
 
-### 2. Dashboard (`dashboard.html`)
-- KPI summary cards (spend, POs, suppliers, invoices)
-- Monthly spend trend chart (Chart.js line)
-- Category spend distribution (doughnut)
-- Recent purchase orders table
-- Activity timeline
-- Pending approvals shortcut
+### 1. Login (`login.html`)
+Role-based authentication with four user types: **Procurement**, **Supplier**, **Finance**, **Admin**.
+Includes demo credential auto-fill and a brand showcase panel.
 
-### 2a. Shop (`shop.html`) — *buyer & admin*
-Shopee-style storefront. Category chips (Laptops, Phones, Accessories…), product cards with
-live stock badges, search, and a product detail modal listing each unit's material code.
-Buying marks a unit sold (live stock drops) and records an order.
+### 2. Dashboard (`dashboard.html`) — *role-aware*
+Each role gets its own view: procurement (orders + requisitions + catalog), supplier (stock + incoming
+orders), finance (invoices/payments/spend), admin (full KPIs, charts, approvals, supplier performance).
 
-### 2b. Inventory (`inventory.html`) — *seller & admin*
-The "storage" editor from the sketch: a category → brand tree on the left, and a detail panel
-on the right showing **material-coded units** (`AL 001`, `AL 002`…). Add stock (auto-generates
-the next material code), mark units sold/in-stock, edit price, and create new products.
+### 2a. Catalog (`shop.html`) — *procurement & admin*
+Supplier catalog with product images, category chips, search, live stock badges, and a detail modal
+listing each unit's material code. "Raise Purchase Order" marks a unit sold (live stock drops) and
+records a Direct PO sent to the supplier.
+
+### 2b. Inventory (`inventory.html`) — *supplier & admin*
+The "storage" editor from the sketch: a category → brand tree on the left, and a detail panel on the
+right showing each product's image and **material-coded units** (`AL 001`, `AL 002`…). Add stock
+(auto-generates the next material code), mark units sold/in-stock, edit price, and create new products.
 
 ### 2c. Orders (`orders.html`)
-Buyer sees *My Orders*, seller sees *Incoming Orders* for their products, admin sees *all*.
+Procurement sees *My Orders*, supplier sees *Incoming Orders* for their products, finance/admin see *all*.
 
 ### 3. Purchase Requisitions (`requisition.html`)
 - Create requisitions with line items

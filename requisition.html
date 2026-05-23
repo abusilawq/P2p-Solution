@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Purchase Requisitions — TechMart</title>
+  <title>Purchase Requisitions — P2P Solutions</title>
   <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
@@ -241,7 +241,7 @@ let currentStep = 1;
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('requisition', 'Purchase Requisitions', 'Requisitions');
   if (!user) return;
-  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
+  if (!['admin', 'procurement'].includes(user.role)) { window.location.href = 'dashboard.html'; return; }
   loadReqs();
   // Set min date
   document.getElementById('reqDate').min = Util.today();

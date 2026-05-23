@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventory — TechMart</title>
+  <title>Inventory — P2P Solutions</title>
   <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
@@ -103,7 +103,7 @@ let me_, all_, mine_, selectedId = null;
 document.addEventListener('DOMContentLoaded', () => {
   me_ = initPage('inventory', 'Inventory', 'Inventory');
   if (!me_) return;
-  if (!['seller', 'admin'].includes(me_.role)) { window.location.href = 'dashboard.html'; return; }
+  if (!['supplier', 'admin'].includes(me_.role)) { window.location.href = 'dashboard.html'; return; }
   load();
 });
 
@@ -152,9 +152,12 @@ function renderDetail(id) {
   renderTree();
   document.getElementById('invDetail').innerHTML = `
     <div class="d-flex align-center justify-between mb-16" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:1.2rem;font-weight:700">${p.emoji} ${p.name}</div>
-        <div class="product-brand">${p.brand} · ${p.category}</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:84px;height:64px;border-radius:8px;overflow:hidden;background:#F8FAFC;flex-shrink:0">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:2.2rem;text-align:center;line-height:64px">${p.emoji}</div>`}</div>
+        <div>
+          <div style="font-size:1.2rem;font-weight:700">${p.name}</div>
+          <div class="product-brand">${p.brand} · ${p.category}</div>
+        </div>
       </div>
       <div style="text-align:right">
         <div class="product-price">${Util.formatCurrency(p.price)}</div>
@@ -226,7 +229,7 @@ function createProduct() {
 
   const units = [];
   for (let i = 1; i <= qty; i++) units.push({ code: prefix + ' ' + String(i).padStart(3, '0'), status: 'in_stock' });
-  const prod = { id: 'P-' + Date.now().toString(36).toUpperCase(), category, brand, name, emoji, materialPrefix: prefix, price, sellerId: me_.id, units };
+  const prod = { id: 'P-' + Date.now().toString(36).toUpperCase(), category, brand, name, emoji, image: 'assets/products/box.svg', materialPrefix: prefix, price, sellerId: me_.id, units };
   all_.unshift(prod);
   Store.saveProducts(all_);
   Modal.close('newProductModal');

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard — TechMart</title>
+  <title>Dashboard — P2P Solutions</title>
   <link rel="stylesheet" href="css/main.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -260,37 +260,39 @@ function renderRoleDashboard(user) {
   const banner = document.getElementById('welcomeActions');
   const panel = document.getElementById('rolePanel');
 
-  if (user.role === 'buyer') {
-    banner.innerHTML = `<a href="shop.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">🛍️ Go Shopping</a>`;
+  const setBanner = (kicker, line) =>
+    document.getElementById('overdueCount').parentElement.parentElement.innerHTML =
+      `<div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">${kicker}</div>
+       <div style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back, ${user.name.split(' ')[0]}!</div>
+       <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">${line}</div>`;
+
+  if (user.role === 'procurement') {
+    banner.innerHTML = `<a href="shop.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">🛍️ Browse Catalog</a>`;
     const mine = orders.filter(o => o.buyerId === user.id);
     const spent = mine.reduce((s, o) => s + o.total, 0);
     const open = mine.filter(o => !['completed', 'delivered'].includes(o.status)).length;
-    document.getElementById('overdueCount').parentElement.parentElement.innerHTML =
-      `<div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">Good to see you 👋</div>
-       <div style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back, ${user.name.split(' ')[0]}!</div>
-       <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong style="color:#fff">${mine.length}</strong> orders and <strong style="color:#FCD34D">${open}</strong> in progress.</div>`;
+    const pendingReqs = Store.getRequisitions().filter(r => r.status === 'pending').length;
+    setBanner('Procurement dashboard 👋', `You have <strong style="color:#fff">${mine.length}</strong> orders, <strong style="color:#FCD34D">${open}</strong> in progress and <strong style="color:#fff">${pendingReqs}</strong> pending requisitions.`);
     panel.innerHTML = `
-      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card"><div class="sic blue">🧺</div><div class="sinfo"><div class="sval">${mine.length}</div><div class="slbl">My Orders</div></div></div>
-        <div class="stat-card"><div class="sic green">💰</div><div class="sinfo"><div class="sval">${Util.formatCurrency(spent)}</div><div class="slbl">Total Spent</div></div></div>
-        <div class="stat-card"><div class="sic cyan">🛍️</div><div class="sinfo"><div class="sval">${products.length}</div><div class="slbl">Products Available</div></div></div>
+        <div class="stat-card"><div class="sic green">💰</div><div class="sinfo"><div class="sval">${Util.formatCurrency(spent)}</div><div class="slbl">Total Procured</div></div></div>
+        <div class="stat-card"><div class="sic amber">📋</div><div class="sinfo"><div class="sval">${pendingReqs}</div><div class="slbl">Pending Requisitions</div></div></div>
+        <div class="stat-card"><div class="sic cyan">🛍️</div><div class="sinfo"><div class="sval">${products.length}</div><div class="slbl">Catalog Items</div></div></div>
       </div>
       <div class="card fade-up d2" style="margin-top:18px">
-        <div class="card-header"><div class="card-title">Recent Orders</div><a href="orders.html" class="btn btn-sm btn-secondary">View All</a></div>
+        <div class="card-header"><div class="card-title">My Recent Orders</div><a href="orders.html" class="btn btn-sm btn-secondary">View All</a></div>
         <div class="table-container"><table><thead><tr><th>Order</th><th>Product</th><th>Code</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody>${mine.length ? mine.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td class="td-mono">${o.code}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td><td>${Util.formatDate(o.date)}</td></tr>`).join('') : '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🛍️</div><h4>No orders yet</h4><p>Head to the Shop to make your first purchase.</p></div></td></tr>'}</tbody></table></div>
+        <tbody>${mine.length ? mine.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td class="td-mono">${o.code}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td><td>${Util.formatDate(o.date)}</td></tr>`).join('') : '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🛍️</div><h4>No orders yet</h4><p>Browse the catalog to raise your first purchase order.</p></div></td></tr>'}</tbody></table></div>
       </div>`;
-  } else { // seller
+  } else if (user.role === 'supplier') {
     banner.innerHTML = `<a href="inventory.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">📦 Manage Inventory</a>`;
     const mineProducts = products.filter(p => p.sellerId === user.id);
     const myIds = new Set(mineProducts.map(p => p.id));
     const incoming = orders.filter(o => myIds.has(o.productId));
     const totalStock = mineProducts.reduce((s, p) => s + stockOf(p), 0);
     const lowStock = mineProducts.filter(p => stockOf(p) <= 2);
-    document.getElementById('overdueCount').parentElement.parentElement.innerHTML =
-      `<div style="color:rgba(255,255,255,0.7);font-size:0.78rem;margin-bottom:4px">Seller dashboard 👋</div>
-       <div style="color:#fff;font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:6px">Welcome back, ${user.name.split(' ')[0]}!</div>
-       <div style="color:rgba(255,255,255,0.65);font-size:0.8rem">You have <strong style="color:#fff">${totalStock}</strong> units in stock and <strong style="color:#FCD34D">${lowStock.length}</strong> low-stock items.</div>`;
+    setBanner('Supplier dashboard 👋', `You have <strong style="color:#fff">${totalStock}</strong> units in stock and <strong style="color:#FCD34D">${lowStock.length}</strong> low-stock items.`);
     panel.innerHTML = `
       <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
         <div class="stat-card"><div class="sic blue">📦</div><div class="sinfo"><div class="sval">${mineProducts.length}</div><div class="slbl">My Products</div></div></div>
@@ -307,6 +309,26 @@ function renderRoleDashboard(user) {
           <div class="card-body" style="padding:0"><div class="table-container"><table><thead><tr><th>Order</th><th>Product</th><th>Total</th><th>Status</th></tr></thead>
           <tbody>${incoming.length ? incoming.slice(0,6).map(o => `<tr><td class="td-mono">${o.id}</td><td class="td-primary">${o.productName}</td><td>${Util.formatCurrency(o.total)}</td><td>${Badge.status(o.status)}</td></tr>`).join('') : '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">🧾</div><h4>No orders yet</h4></div></td></tr>'}</tbody></table></div></div>
         </div>
+      </div>`;
+  } else { // finance
+    banner.innerHTML = `<a href="reports.html" class="btn" style="background:#fff;color:#1e3a8a;border-color:#fff;">📊 View Reports</a>`;
+    const invoices = Store.getInvoices();
+    const payments = Store.getPayments();
+    const openInv = invoices.filter(i => i.status !== 'paid').length;
+    const overdue = invoices.filter(i => i.status === 'overdue').length;
+    const totalSpend = invoices.reduce((s, i) => s + (i.total || 0), 0);
+    setBanner('Finance dashboard 👋', `You have <strong style="color:#fff">${openInv}</strong> open invoices and <strong style="color:#FCD34D">${overdue}</strong> overdue.`);
+    panel.innerHTML = `
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card"><div class="sic amber">🧾</div><div class="sinfo"><div class="sval">${openInv}</div><div class="slbl">Open Invoices</div></div></div>
+        <div class="stat-card"><div class="sic red">⚠️</div><div class="sinfo"><div class="sval">${overdue}</div><div class="slbl">Overdue</div></div></div>
+        <div class="stat-card"><div class="sic purple">💰</div><div class="sinfo"><div class="sval">${Util.formatCurrency(totalSpend)}</div><div class="slbl">Total Invoiced</div></div></div>
+        <div class="stat-card"><div class="sic green">💳</div><div class="sinfo"><div class="sval">${payments.length}</div><div class="slbl">Payments</div></div></div>
+      </div>
+      <div class="card fade-up d2" style="margin-top:18px">
+        <div class="card-header"><div class="card-title">Recent Invoices</div><a href="invoices.html" class="btn btn-sm btn-secondary">View All</a></div>
+        <div class="table-container"><table><thead><tr><th>Invoice</th><th>Supplier</th><th>Total</th><th>Status</th><th>Match</th><th>Due</th></tr></thead>
+        <tbody>${invoices.length ? invoices.slice(0,6).map(i => `<tr><td class="td-mono">${i.id}</td><td class="td-primary">${i.supplier}</td><td>${Util.formatCurrency(i.total)}</td><td>${Badge.status(i.status)}</td><td>${Badge.status(i.matchStatus)}</td><td>${Util.formatDate(i.due)}</td></tr>`).join('') : '<tr><td colspan="6"><div class="empty-state"><h4>No invoices</h4></div></td></tr>'}</tbody></table></div>
       </div>`;
   }
 }

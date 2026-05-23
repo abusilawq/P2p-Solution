@@ -183,7 +183,7 @@ const Sidebar = {
 
   logout() {
     Store.clearUser();
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
   },
 };
 
@@ -243,9 +243,9 @@ function filterTable(inputId, tableId) {
 /* ── SIDEBAR HTML TEMPLATE ──────────────────────────────────── */
 const NAV_PAGES = {
   dashboard:      { href:'dashboard.html',       icon:'▦',  label:'Dashboard' },
-  shop:           { href:'shop.html',            icon:'🛍️', label:'Shop' },
+  shop:           { href:'shop.html',            icon:'🛍️', label:'Catalog' },
   inventory:      { href:'inventory.html',       icon:'📦', label:'Inventory' },
-  orders:         { href:'orders.html',          icon:'🧺', label:'My Orders' },
+  orders:         { href:'orders.html',          icon:'🧺', label:'Orders' },
   requisition:    { href:'requisition.html',     icon:'📋', label:'Requisitions' },
   purchaseOrders: { href:'purchase-orders.html', icon:'🧾', label:'Purchase Orders' },
   suppliers:      { href:'suppliers.html',       icon:'🏢', label:'Suppliers' },
@@ -257,15 +257,19 @@ const NAV_PAGES = {
 
 /* Role → ordered list of nav sections. Each section: [label, ...pageKeys] */
 const ROLE_NAV = {
-  buyer: [
-    ['Shop',   'dashboard', 'shop', 'orders'],
+  procurement: [
+    ['Procurement', 'dashboard', 'shop', 'requisition', 'purchaseOrders', 'suppliers', 'orders'],
   ],
-  seller: [
-    ['Selling', 'dashboard', 'inventory', 'orders'],
+  finance: [
+    ['Finance', 'dashboard', 'invoices', 'payments', 'reports', 'orders'],
+  ],
+  supplier: [
+    ['Supplier', 'dashboard', 'inventory', 'orders'],
   ],
   admin: [
-    ['Main',        'dashboard', 'shop', 'inventory', 'orders'],
+    ['Main',        'dashboard', 'shop', 'orders'],
     ['Procurement', 'requisition', 'purchaseOrders', 'suppliers'],
+    ['Inventory',   'inventory'],
     ['Finance',     'invoices', 'payments'],
     ['System',      'reports', 'admin'],
   ],
@@ -275,8 +279,13 @@ function buildSidebar(activePage) {
   const role = (Store.getUser() || {}).role || 'admin';
   const sections = ROLE_NAV[role] || ROLE_NAV.admin;
 
-  // Seller's orders page is "Incoming Orders" not "My Orders"
-  const labelFor = (key) => (key === 'orders' && role === 'seller') ? 'Incoming Orders' : NAV_PAGES[key].label;
+  // Orders label varies by role
+  const labelFor = (key) => {
+    if (key !== 'orders') return NAV_PAGES[key].label;
+    if (role === 'supplier') return 'Incoming Orders';
+    if (role === 'procurement') return 'My Orders';
+    return 'Orders';
+  };
 
   const navItem = (key) => {
     const p = NAV_PAGES[key];
@@ -293,8 +302,8 @@ function buildSidebar(activePage) {
       <div class="sidebar-logo">
         <div class="logo-icon">🛒</div>
         <div class="logo-text">
-          <span class="name">TechMart</span>
-          <span class="sub">IT Marketplace</span>
+          <span class="name">P2P Solutions</span>
+          <span class="sub">Procure to Pay</span>
         </div>
       </div>
       <nav class="sidebar-nav">
@@ -375,7 +384,7 @@ function buildTopbar(title, breadcrumb) {
 /* ── AUTH GUARD ─────────────────────────────────────────────── */
 function requireAuth() {
   const user = Store.getUser();
-  if (!user) { window.location.href = 'index.html'; return null; }
+  if (!user) { window.location.href = 'login.html'; return null; }
   return user;
 }
 

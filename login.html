@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — P2P Solutions</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    body { background: #fff; }
+    .login-page { animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+    .login-stats { display:flex; gap:24px; margin-top:32px; flex-wrap:wrap; }
+    .ls-item { text-align:center; }
+    .ls-val { font-family:'Outfit',sans-serif; font-size:1.4rem; font-weight:700; color:#fff; }
+    .ls-lbl { font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.1em; }
+  </style>
+</head>
+<body>
+<div class="login-page">
+
+  <!-- Left Brand Panel -->
+  <div class="login-brand">
+    <div class="login-brand-inner">
+      <a href="index.html" style="color:rgba(255,255,255,0.7);font-size:0.78rem;display:inline-block;margin-bottom:18px">← Back to home</a>
+      <div class="lb-logo">🛒</div>
+      <h1>P2P Solutions<br/>Procurement Platform</h1>
+      <p>One platform for the full business-to-business purchasing lifecycle — catalog, requisition, purchase orders, supplier inventory and payments.</p>
+
+      <div class="lb-features">
+        <div class="lb-feat"><div class="lb-feat-ico">🛍️</div>B2B Product Catalog</div>
+        <div class="lb-feat"><div class="lb-feat-ico">📋</div>Automated Requisitions & POs</div>
+        <div class="lb-feat"><div class="lb-feat-ico">📦</div>Live Supplier Inventory & Stock</div>
+        <div class="lb-feat"><div class="lb-feat-ico">🧾</div>Invoice Matching & Payments</div>
+        <div class="lb-feat"><div class="lb-feat-ico">📊</div>Spend Analytics & Reports</div>
+      </div>
+
+      <div class="login-stats">
+        <div class="ls-item"><div class="ls-val">8+</div><div class="ls-lbl">Suppliers</div></div>
+        <div class="ls-item"><div class="ls-val">100+</div><div class="ls-lbl">Orders</div></div>
+        <div class="ls-item"><div class="ls-val">RM 1.2M</div><div class="ls-lbl">Processed</div></div>
+        <div class="ls-item"><div class="ls-val">99.8%</div><div class="ls-lbl">Accuracy</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="login-form-side">
+    <div class="login-form-box">
+      <h2>Welcome Back</h2>
+      <p>Sign in to access your B2B dashboard</p>
+
+      <!-- Role Selector -->
+      <div class="role-grid" id="roleGrid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="role-opt active" data-role="procurement" onclick="selectRole(this)">
+          <div class="role-ico">🛒</div>
+          <div class="role-lbl">Procurement</div>
+        </div>
+        <div class="role-opt" data-role="supplier" onclick="selectRole(this)">
+          <div class="role-ico">📦</div>
+          <div class="role-lbl">Supplier</div>
+        </div>
+        <div class="role-opt" data-role="finance" onclick="selectRole(this)">
+          <div class="role-ico">💰</div>
+          <div class="role-lbl">Finance</div>
+        </div>
+        <div class="role-opt" data-role="admin" onclick="selectRole(this)">
+          <div class="role-ico">👑</div>
+          <div class="role-lbl">Admin</div>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label req">Email Address</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="your@company.com" required/>
+          <span class="form-error">Please enter a valid email</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label req">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required/>
+          <span class="form-error">Password is required</span>
+        </div>
+
+        <div class="d-flex align-center justify-between mb-16" style="margin-top:-4px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-muted);cursor:pointer">
+            <input type="checkbox" id="rememberMe"/> Remember me
+          </label>
+          <a href="#" style="font-size:0.75rem">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100" id="loginBtn">
+          Sign In →
+        </button>
+
+        <div id="loginError" style="display:none;margin-top:10px;padding:8px 12px;background:var(--danger-light);border-radius:6px;font-size:0.76rem;color:#991B1B;"></div>
+      </form>
+
+      <!-- Demo Credentials -->
+      <div class="login-demo" style="margin-top:20px;">
+        <div style="margin-bottom:8px;font-weight:600;color:var(--text-secondary);font-size:0.75rem">🔑 Demo Credentials</div>
+        <div id="demoCards" style="display:flex;flex-direction:column;gap:6px;text-align:left;">
+          <div class="demo-card" onclick="fillDemo('procurement@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">🛒 Procurement:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> procurement@acme.com / pass123</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('supplier@techcore.my','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">📦 Supplier:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> supplier@techcore.my / pass123</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('finance@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">💰 Finance:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> finance@acme.com / pass123</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('admin@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">👑 Admin:</span>
+            <span style="font-size:0.72rem;color:var(--text-muted)"> admin@acme.com / pass123</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;font-size:0.7rem;color:var(--text-muted);margin-top:20px">
+        FIT2 Group 8 · University Mini Project · 2026
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/data.js"></script>
+<script>
+  // Check if already logged in
+  try {
+    const existing = JSON.parse(localStorage.getItem('p2p_user'));
+    if (existing) window.location.href = 'dashboard.html';
+  } catch(e) {}
+
+  let selectedRole = 'procurement';
+  const demos = { admin: 'admin@acme.com', procurement: 'procurement@acme.com', finance: 'finance@acme.com', supplier: 'supplier@techcore.my' };
+
+  function selectRole(el) {
+    document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    selectedRole = el.dataset.role;
+    document.getElementById('loginEmail').value = demos[selectedRole] || '';
+    document.getElementById('loginPassword').value = 'pass123';
+  }
+
+  function fillDemo(email, pass) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pass;
+    const u = P2PData.users.find(u => u.email === email);
+    if (u) {
+      document.querySelectorAll('.role-opt').forEach(o => o.classList.toggle('active', o.dataset.role === u.role));
+      selectedRole = u.role;
+    }
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass  = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    const btn   = document.getElementById('loginBtn');
+
+    btn.textContent = 'Signing in…';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      const user = P2PData.users.find(u => u.email === email && u.password === pass);
+      if (!user) {
+        errEl.textContent = 'Invalid email or password. Please try the demo credentials below.';
+        errEl.style.display = 'block';
+        btn.textContent = 'Sign In →';
+        btn.disabled = false;
+        return;
+      }
+      errEl.style.display = 'none';
+      localStorage.setItem('p2p_user', JSON.stringify(user));
+      btn.textContent = '✓ Redirecting…';
+      btn.style.background = 'var(--success)';
+      setTimeout(() => window.location.href = 'dashboard.html', 600);
+    }, 800);
+  }
+
+  // Auto-fill procurement on load
+  document.getElementById('loginEmail').value = 'procurement@acme.com';
+  document.getElementById('loginPassword').value = 'pass123';
+</script>
+</body>
+</html>

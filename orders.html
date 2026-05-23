@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orders — TechMart</title>
+  <title>Orders — P2P Solutions</title>
   <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
@@ -64,16 +64,16 @@ function myProductIds() {
 
 function load() {
   const all = Store.getOrders();
-  if (me_.role === 'buyer') {
+  if (me_.role === 'procurement') {
     view_ = all.filter(o => o.buyerId === me_.id);
-    setText('ordTitle', 'My Orders'); setText('ordSub', 'Your purchases and their status');
-  } else if (me_.role === 'seller') {
+    setText('ordTitle', 'My Orders'); setText('ordSub', 'Purchase orders you raised and their status');
+  } else if (me_.role === 'supplier') {
     const ids = myProductIds();
     view_ = all.filter(o => ids.has(o.productId));
-    setText('ordTitle', 'Incoming Orders'); setText('ordSub', 'Orders placed for your products');
+    setText('ordTitle', 'Incoming Orders'); setText('ordSub', 'Purchase orders placed for your products');
   } else {
     view_ = all;
-    setText('ordTitle', 'All Orders'); setText('ordSub', 'Every order across the marketplace');
+    setText('ordTitle', 'All Orders'); setText('ordSub', 'Every purchase order across the platform');
   }
   renderHead();
   renderRows();
@@ -89,7 +89,7 @@ function updateStats() {
 }
 
 function renderHead() {
-  const canManage = me_.role !== 'buyer';
+  const canManage = ['supplier','admin'].includes(me_.role);
   document.getElementById('ordHead').innerHTML = `
     <th>Order ID</th><th>Product</th><th>Material Code</th>
     ${canManage ? '<th>Buyer</th>' : ''}
@@ -98,7 +98,7 @@ function renderHead() {
 }
 
 function renderRows() {
-  const canManage = me_.role !== 'buyer';
+  const canManage = ['supplier','admin'].includes(me_.role);
   const tbody = document.getElementById('ordBody');
   if (!view_.length) {
     tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🧺</div><h4>No orders yet</h4></div></td></tr>`;
