@@ -56,6 +56,12 @@ const Badge = {
       scheduled:  ['info',    'Scheduled'],
       completed:  ['success', 'Completed'],
       processing: ['info',    'Processing'],
+      direct:     ['primary', 'Direct PO'],
+      indirect:   ['purple',  'Indirect PO'],
+      in_stock:   ['success', 'In Stock'],
+      low_stock:  ['warning', 'Low Stock'],
+      sold:       ['neutral', 'Sold'],
+      out_of_stock:['danger', 'Out of Stock'],
     };
     const [cls, lbl] = map[s] || ['neutral', s];
     return `<span class="badge badge-${cls}">${lbl}</span>`;
@@ -235,47 +241,64 @@ function filterTable(inputId, tableId) {
 }
 
 /* ── SIDEBAR HTML TEMPLATE ──────────────────────────────────── */
+const NAV_PAGES = {
+  dashboard:      { href:'dashboard.html',       icon:'▦',  label:'Dashboard' },
+  shop:           { href:'shop.html',            icon:'🛍️', label:'Shop' },
+  inventory:      { href:'inventory.html',       icon:'📦', label:'Inventory' },
+  orders:         { href:'orders.html',          icon:'🧺', label:'My Orders' },
+  requisition:    { href:'requisition.html',     icon:'📋', label:'Requisitions' },
+  purchaseOrders: { href:'purchase-orders.html', icon:'🧾', label:'Purchase Orders' },
+  suppliers:      { href:'suppliers.html',       icon:'🏢', label:'Suppliers' },
+  invoices:       { href:'invoices.html',        icon:'💵', label:'Invoices' },
+  payments:       { href:'payments.html',        icon:'💳', label:'Payments' },
+  reports:        { href:'reports.html',         icon:'📊', label:'Reports' },
+  admin:          { href:'admin.html',           icon:'⚙️', label:'Admin Panel' },
+};
+
+/* Role → ordered list of nav sections. Each section: [label, ...pageKeys] */
+const ROLE_NAV = {
+  buyer: [
+    ['Shop',   'dashboard', 'shop', 'orders'],
+  ],
+  seller: [
+    ['Selling', 'dashboard', 'inventory', 'orders'],
+  ],
+  admin: [
+    ['Main',        'dashboard', 'shop', 'inventory', 'orders'],
+    ['Procurement', 'requisition', 'purchaseOrders', 'suppliers'],
+    ['Finance',     'invoices', 'payments'],
+    ['System',      'reports', 'admin'],
+  ],
+};
+
 function buildSidebar(activePage) {
-  const pages = {
-    dashboard:        { href:'dashboard.html',       icon:'▦',  label:'Dashboard' },
-    requisition:      { href:'requisition.html',     icon:'📋', label:'Requisitions',  badge: 2 },
-    purchaseOrders:   { href:'purchase-orders.html', icon:'📦', label:'Purchase Orders' },
-    suppliers:        { href:'suppliers.html',        icon:'🏢', label:'Suppliers' },
-    invoices:         { href:'invoices.html',         icon:'🧾', label:'Invoices',       badge: 1 },
-    payments:         { href:'payments.html',         icon:'💳', label:'Payments' },
-    reports:          { href:'reports.html',          icon:'📊', label:'Reports' },
-    admin:            { href:'admin.html',            icon:'⚙️', label:'Admin Panel' },
+  const role = (Store.getUser() || {}).role || 'admin';
+  const sections = ROLE_NAV[role] || ROLE_NAV.admin;
+
+  // Seller's orders page is "Incoming Orders" not "My Orders"
+  const labelFor = (key) => (key === 'orders' && role === 'seller') ? 'Incoming Orders' : NAV_PAGES[key].label;
+
+  const navItem = (key) => {
+    const p = NAV_PAGES[key];
+    const active = activePage === key ? 'active' : '';
+    return `<a href="${p.href}" class="nav-item ${active}"><span class="ni">${p.icon}</span><span class="nl">${labelFor(key)}</span></a>`;
   };
 
-  const navItem = (key, p) => {
-    const active = activePage === key ? 'active' : '';
-    const badgeHtml = p.badge ? `<span class="nav-badge">${p.badge}</span>` : '';
-    return `<a href="${p.href}" class="nav-item ${active}"><span class="ni">${p.icon}</span><span class="nl">${p.label}</span>${badgeHtml}</a>`;
-  };
+  const navHtml = sections.map(([label, ...keys]) =>
+    `<div class="nav-section">${label}</div>` + keys.map(navItem).join('')
+  ).join('');
 
   return `
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">🔄</div>
+        <div class="logo-icon">🛒</div>
         <div class="logo-text">
-          <span class="name">P2P Solutions</span>
-          <span class="sub">Procure to Pay</span>
+          <span class="name">TechMart</span>
+          <span class="sub">IT Marketplace</span>
         </div>
       </div>
       <nav class="sidebar-nav">
-        <div class="nav-section">Main</div>
-        ${navItem('dashboard', pages.dashboard)}
-        <div class="nav-section">Procurement</div>
-        ${navItem('requisition', pages.requisition)}
-        ${navItem('purchaseOrders', pages.purchaseOrders)}
-        ${navItem('suppliers', pages.suppliers)}
-        <div class="nav-section">Finance</div>
-        ${navItem('invoices', pages.invoices)}
-        ${navItem('payments', pages.payments)}
-        <div class="nav-section">Analytics</div>
-        ${navItem('reports', pages.reports)}
-        <div class="nav-section">System</div>
-        ${navItem('admin', pages.admin)}
+        ${navHtml}
       </nav>
       <div class="sidebar-footer">
         <div class="sidebar-user" onclick="Sidebar.logout()">
@@ -292,6 +315,14 @@ function buildSidebar(activePage) {
     </aside>
     <div class="overlay-bg" id="sidebarOverlay"></div>
   `;
+}
+
+/* Guard a page to specific roles; redirects if the current user lacks access */
+function requireRole(...roles) {
+  const user = Store.getUser();
+  if (!user) { window.location.href = 'index.html'; return null; }
+  if (!roles.includes(user.role)) { window.location.href = 'dashboard.html'; return null; }
+  return user;
 }
 
 /* ── TOPBAR HTML TEMPLATE ───────────────────────────────────── */
@@ -332,8 +363,7 @@ function buildTopbar(title, breadcrumb) {
             <span id="topbarUserName" style="font-size:0.78rem;font-weight:500;color:var(--text-secondary)">User</span>
           </button>
           <div class="dropdown-menu" id="userMenu">
-            <a href="admin.html" class="drop-item">⚙ Settings</a>
-            <div class="drop-divider"></div>
+            ${(Store.getUser()||{}).role === 'admin' ? '<a href="admin.html" class="drop-item">⚙ Settings</a><div class="drop-divider"></div>' : ''}
             <div class="drop-item danger" onclick="Sidebar.logout()">⏻ Logout</div>
           </div>
         </div>

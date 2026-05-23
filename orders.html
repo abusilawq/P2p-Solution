@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orders — TechMart</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+  <div id="sidebarContainer"></div>
+  <div class="main-content">
+    <div id="topbarContainer"></div>
+    <div class="page-body">
+
+      <div class="page-header fade-up">
+        <div>
+          <h2 id="ordTitle">Orders</h2>
+          <p id="ordSub">Your purchases and their status</p>
+        </div>
+      </div>
+
+      <div class="stats-grid fade-up d1" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="sic blue">🧺</div><div class="sinfo"><div class="sval" id="statTotal">—</div><div class="slbl">Orders</div></div></div>
+        <div class="stat-card"><div class="sic green">💰</div><div class="sinfo"><div class="sval" id="statValue">—</div><div class="slbl">Total Value</div></div></div>
+        <div class="stat-card"><div class="sic cyan">🚚</div><div class="sinfo"><div class="sval" id="statOpen">—</div><div class="slbl">In Progress</div></div></div>
+      </div>
+
+      <div class="card fade-up d2">
+        <div class="card-header">
+          <div class="card-title">Order List</div>
+          <div class="search-bar" style="width:220px;margin:0">
+            <span class="si">🔍</span>
+            <input class="form-control" id="ordSearch" placeholder="Search orders…" oninput="filterTable('ordSearch','ordTable')"/>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="ordTable">
+            <thead><tr id="ordHead"></tr></thead>
+            <tbody id="ordBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script>
+let me_, view_;
+
+document.addEventListener('DOMContentLoaded', () => {
+  me_ = initPage('orders', 'Orders', 'Orders');
+  if (!me_) return;
+  load();
+});
+
+function myProductIds() {
+  return new Set(Store.getProducts().filter(p => p.sellerId === me_.id).map(p => p.id));
+}
+
+function load() {
+  const all = Store.getOrders();
+  if (me_.role === 'buyer') {
+    view_ = all.filter(o => o.buyerId === me_.id);
+    setText('ordTitle', 'My Orders'); setText('ordSub', 'Your purchases and their status');
+  } else if (me_.role === 'seller') {
+    const ids = myProductIds();
+    view_ = all.filter(o => ids.has(o.productId));
+    setText('ordTitle', 'Incoming Orders'); setText('ordSub', 'Orders placed for your products');
+  } else {
+    view_ = all;
+    setText('ordTitle', 'All Orders'); setText('ordSub', 'Every order across the marketplace');
+  }
+  renderHead();
+  renderRows();
+  updateStats();
+}
+
+function setText(id, t) { document.getElementById(id).textContent = t; }
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = view_.length;
+  document.getElementById('statValue').textContent = Util.formatCurrency(view_.reduce((s, o) => s + o.total, 0));
+  document.getElementById('statOpen').textContent = view_.filter(o => !['completed', 'delivered'].includes(o.status)).length;
+}
+
+function renderHead() {
+  const canManage = me_.role !== 'buyer';
+  document.getElementById('ordHead').innerHTML = `
+    <th>Order ID</th><th>Product</th><th>Material Code</th>
+    ${canManage ? '<th>Buyer</th>' : ''}
+    <th>Qty</th><th>Total</th><th>Status</th><th>Date</th>
+    ${canManage ? '<th>Actions</th>' : ''}`;
+}
+
+function renderRows() {
+  const canManage = me_.role !== 'buyer';
+  const tbody = document.getElementById('ordBody');
+  if (!view_.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🧺</div><h4>No orders yet</h4></div></td></tr>`;
+    return;
+  }
+  const users = P2PData.users;
+  tbody.innerHTML = view_.map(o => {
+    const buyer = users.find(u => u.id === o.buyerId);
+    return `<tr>
+      <td class="td-mono">${o.id}</td>
+      <td class="td-primary">${o.productName}</td>
+      <td class="td-mono">${o.code}</td>
+      ${canManage ? `<td>${buyer ? buyer.name : o.buyerId}</td>` : ''}
+      <td>${o.qty}</td>
+      <td style="font-weight:500">${Util.formatCurrency(o.total)}</td>
+      <td>${Badge.status(o.status)}</td>
+      <td>${Util.formatDate(o.date)}</td>
+      ${canManage ? `<td><button class="btn btn-sm btn-secondary" onclick="advance('${o.id}')">🔄 Advance</button></td>` : ''}
+    </tr>`;
+  }).join('');
+}
+
+function advance(id) {
+  const all = Store.getOrders();
+  const o = all.find(x => x.id === id);
+  const next = { confirmed: 'in_transit', in_transit: 'delivered', delivered: 'completed' };
+  if (!next[o.status]) { Toast.info('Info', 'Order is already completed.'); return; }
+  o.status = next[o.status];
+  Store.saveOrders(all);
+  Toast.success('Status updated', `${id} → ${o.status.replace('_', ' ')}.`);
+  load();
+}
+</script>
+</body>
+</html>

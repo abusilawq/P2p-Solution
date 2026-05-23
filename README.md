@@ -10,13 +10,15 @@ A complete, production-grade web platform that digitalizes the **entire purchasi
 
 ## Live Demo Login
 
-| Role               | Email                 | Password   |
-|--------------------|-----------------------|------------|
-| **Administrator**  | sarah.chen@acme.com   | `pass123`  |
-| **Procurement**    | james.r@acme.com      | `pass123`  |
-| **Finance Team**   | priya.n@acme.com      | `pass123`  |
+| Role         | Email             | Password   | Can do                                         |
+|--------------|-------------------|------------|------------------------------------------------|
+| **Buyer**    | buyer@shop.com    | `pass123`  | Browse the shop, buy products, track orders    |
+| **Seller**   | seller@shop.com   | `pass123`  | Edit live stock & material codes, view incoming orders |
+| **Admin**    | admin@shop.com    | `pass123`  | Everything — shop, inventory, full procurement |
 
 > *Or just click any of the demo accounts pre-filled on the login screen.*
+
+Each role sees its **own panel** — the sidebar and dashboard are filtered to that role.
 
 ---
 
@@ -48,9 +50,12 @@ npx http-server -p 3000 -c-1
 
 ```
 p2p-solution/
-├── index.html              ← Login / Authentication entry
-├── dashboard.html          ← Main dashboard with KPIs & charts
-├── requisition.html        ← Purchase Requisition module
+├── index.html              ← Login / Authentication entry (buyer · seller · admin)
+├── dashboard.html          ← Role-aware dashboard (buyer / seller / admin views)
+├── shop.html               ← Shopee-style storefront — browse & buy IT products
+├── inventory.html          ← Live stock & material codes — editable storage
+├── orders.html             ← Order tracking (my orders / incoming / all)
+├── requisition.html        ← Purchase Requisition module (Direct / Indirect)
 ├── purchase-orders.html    ← PO management
 ├── suppliers.html          ← Supplier management
 ├── invoices.html           ← Invoice handling & matching
@@ -88,6 +93,19 @@ Role-based authentication with three user types: **Admin**, **Procurement Staff*
 - Recent purchase orders table
 - Activity timeline
 - Pending approvals shortcut
+
+### 2a. Shop (`shop.html`) — *buyer & admin*
+Shopee-style storefront. Category chips (Laptops, Phones, Accessories…), product cards with
+live stock badges, search, and a product detail modal listing each unit's material code.
+Buying marks a unit sold (live stock drops) and records an order.
+
+### 2b. Inventory (`inventory.html`) — *seller & admin*
+The "storage" editor from the sketch: a category → brand tree on the left, and a detail panel
+on the right showing **material-coded units** (`AL 001`, `AL 002`…). Add stock (auto-generates
+the next material code), mark units sold/in-stock, edit price, and create new products.
+
+### 2c. Orders (`orders.html`)
+Buyer sees *My Orders*, seller sees *Incoming Orders* for their products, admin sees *all*.
 
 ### 3. Purchase Requisitions (`requisition.html`)
 - Create requisitions with line items

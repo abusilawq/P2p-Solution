@@ -832,3 +832,75 @@ select.form-control { cursor: pointer; }
 .w-100 { width: 100%; }
 .overlay-bg { position: fixed; inset: 0; background: transparent; z-index: 50; display: none; }
 .overlay-bg.show { display: block; }
+
+/* ─── STOREFRONT (Shopee-style) ──────────────────────────── */
+:root { --shop: #EE4D2D; --shop-light: #FFF1ED; }
+
+/* Category chips */
+.cat-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.cat-chip {
+  padding: 7px 16px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card-bg); color: var(--text-secondary); font-size: 0.78rem;
+  font-weight: 500; cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.cat-chip:hover { border-color: var(--shop); color: var(--shop); }
+.cat-chip.active { background: var(--shop); border-color: var(--shop); color: #fff; }
+
+/* Product grid */
+.shop-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.product-card {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  overflow: hidden; cursor: pointer; transition: all var(--transition); display: flex; flex-direction: column;
+}
+.product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--shop); }
+.product-img {
+  height: 130px; display: flex; align-items: center; justify-content: center;
+  font-size: 3.4rem; background: linear-gradient(135deg, #F8FAFC, #EEF2F7);
+}
+.product-info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.product-name { font-size: 0.84rem; font-weight: 600; color: var(--text-primary); font-family: var(--font-display); }
+.product-brand { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.product-price { font-size: 1.05rem; font-weight: 700; color: var(--shop); margin-top: auto; }
+.stock-badge { font-size: 0.68rem; font-weight: 600; }
+.stock-badge.ok { color: var(--success); }
+.stock-badge.low { color: var(--warning); }
+.stock-badge.out { color: var(--danger); }
+.btn-shop { background: var(--shop); color: #fff; border-color: var(--shop); }
+.btn-shop:hover { background: #d63e1f; border-color: #d63e1f; }
+.btn-shop:disabled { background: var(--border); border-color: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+/* Inventory two-pane (category → brand → units) */
+.inv-layout { display: grid; grid-template-columns: 240px 1fr; gap: 16px; align-items: start; }
+.inv-tree { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px; }
+.inv-cat { margin-bottom: 4px; }
+.inv-cat-label {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 9px 12px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.8rem;
+  cursor: pointer; color: var(--text-primary);
+}
+.inv-cat-label:hover { background: var(--bg); }
+.inv-brands { overflow: hidden; max-height: 0; transition: max-height .25s ease; }
+.inv-cat.open .inv-brands { max-height: 500px; }
+.inv-cat.open .inv-caret { transform: rotate(90deg); }
+.inv-caret { transition: transform .2s ease; color: var(--text-muted); font-size: 0.7rem; }
+.inv-brand {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 7px 12px 7px 26px; border-radius: var(--radius-sm); font-size: 0.78rem;
+  color: var(--text-secondary); cursor: pointer;
+}
+.inv-brand:hover { background: var(--bg); color: var(--text-primary); }
+.inv-brand.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.inv-count { font-size: 0.66rem; color: var(--text-muted); }
+.unit-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+  font-family: 'Courier New', monospace; font-size: 0.72rem; border: 1px solid var(--border);
+}
+.unit-chip.in_stock { background: var(--success-light); color: #065F46; border-color: #A7F3D0; }
+.unit-chip.sold { background: #F1F5F9; color: var(--text-muted); text-decoration: line-through; }
+
+@media (max-width: 768px) {
+  .inv-layout { grid-template-columns: 1fr; }
+}

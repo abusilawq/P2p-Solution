@@ -148,6 +148,7 @@ let allPayments = [];
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('payments', 'Payments', 'Payment Tracking');
   if (!user) return;
+  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
   loadPayments();
   populateDropdowns();
   document.getElementById('payDate').value = Util.today();
