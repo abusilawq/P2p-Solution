@@ -159,7 +159,7 @@ let allInvs = [];
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('invoices', 'Invoices', 'Invoice Management');
   if (!user) return;
-  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
+  if (!['admin', 'finance'].includes(user.role)) { window.location.href = 'dashboard.html'; return; }
   loadInvoices();
   populateDropdowns();
   document.getElementById('invIssued').value = Util.today();

@@ -59,9 +59,10 @@ function writeDB(data) {
 
 // ── AUTH ───────────────────────────────────────────────────
 const VALID_USERS = [
-  { id: 'u-admin',  name: 'Sarah Chen',   email: 'admin@shop.com',  password: 'pass123', role: 'admin'  },
-  { id: 'u-buyer',  name: 'James Rivera',  email: 'buyer@shop.com',  password: 'pass123', role: 'buyer'  },
-  { id: 'u-seller', name: 'Priya Nair',   email: 'seller@shop.com', password: 'pass123', role: 'seller' },
+  { id: 'u-admin', name: 'Sarah Chen',   email: 'admin@acme.com',       password: 'pass123', role: 'admin'       },
+  { id: 'u-proc',  name: 'James Rivera',  email: 'procurement@acme.com', password: 'pass123', role: 'procurement' },
+  { id: 'u-fin',   name: 'Priya Nair',   email: 'finance@acme.com',     password: 'pass123', role: 'finance'     },
+  { id: 'u-sup',   name: 'Ali Hassan',   email: 'supplier@techcore.my', password: 'pass123', role: 'supplier'    },
 ];
 
 app.post('/api/auth/login', (req, res) => {

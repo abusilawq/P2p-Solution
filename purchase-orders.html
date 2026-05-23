@@ -168,7 +168,7 @@ let allPOs = [];
 document.addEventListener('DOMContentLoaded', () => {
   const user = initPage('purchaseOrders', 'Purchase Orders', 'Purchase Orders');
   if (!user) return;
-  if (user.role !== 'admin') { window.location.href = 'dashboard.html'; return; }
+  if (!['admin', 'procurement'].includes(user.role)) { window.location.href = 'dashboard.html'; return; }
   loadPOs();
   populateDropdowns();
   document.getElementById('poDelivery').min = Util.today();

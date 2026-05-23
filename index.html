@@ -3,190 +3,154 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login — TechMart</title>
+  <title>P2P Solutions — IT Procurement Marketplace</title>
   <link rel="stylesheet" href="css/main.css"/>
-  <style>
-    body { background: #fff; }
-    .login-page { animation: fadeIn .4s ease; }
-    @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-    .login-stats { display:flex; gap:24px; margin-top:32px; flex-wrap:wrap; }
-    .ls-item { text-align:center; }
-    .ls-val { font-family:'Outfit',sans-serif; font-size:1.4rem; font-weight:700; color:#fff; }
-    .ls-lbl { font-size:0.65rem; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.1em; }
-  </style>
 </head>
-<body>
-<div class="login-page">
+<body style="background:#fff">
 
-  <!-- Left Brand Panel -->
-  <div class="login-brand">
-    <div class="login-brand-inner">
-      <div class="lb-logo">🛒</div>
-      <h1>TechMart<br/>IT Marketplace</h1>
-      <p>Buy and sell IT products in one place — live stock, material-coded inventory, and a full procure-to-pay backend.</p>
+  <!-- Top Nav -->
+  <header class="lp-nav">
+    <div class="lp-logo"><span class="ico">🛒</span> P2P Solutions <span style="color:var(--accent)">B2B</span></div>
+    <nav class="lp-navlinks">
+      <a href="#catalog">Catalog</a>
+      <a href="#features">Why Us</a>
+      <a href="#how">How it Works</a>
+      <a class="btn btn-primary btn-sm" id="navAuthBtn" href="login.html">Login →</a>
+    </nav>
+  </header>
 
-      <div class="lb-features">
-        <div class="lb-feat"><div class="lb-feat-ico">🛍️</div>Browse & Buy IT Products</div>
-        <div class="lb-feat"><div class="lb-feat-ico">📦</div>Live Stock & Material Codes</div>
-        <div class="lb-feat"><div class="lb-feat-ico">✏️</div>Seller Inventory Editing</div>
-        <div class="lb-feat"><div class="lb-feat-ico">🧾</div>Direct & Indirect Purchase Orders</div>
-        <div class="lb-feat"><div class="lb-feat-ico">💳</div>Order & Payment Tracking</div>
-        <div class="lb-feat"><div class="lb-feat-ico">📊</div>Admin Marketplace Analytics</div>
+  <!-- Hero -->
+  <section class="lp-hero">
+    <div class="lp-badge">Business-to-Business · Procure to Pay</div>
+    <h1>The wholesale IT marketplace for modern procurement teams</h1>
+    <p>Browse a live supplier catalog, raise requisitions and purchase orders, track stock in real time, and settle invoices — all in one B2B platform.</p>
+    <div class="lp-cta">
+      <a href="#catalog" class="btn btn-primary btn-lg">🛍️ Browse Catalog</a>
+      <a href="login.html" class="btn btn-secondary btn-lg" id="heroAuthBtn">Login to Order</a>
+    </div>
+  </section>
+
+  <!-- Catalog (browse only) -->
+  <section class="lp-section" id="catalog">
+    <div class="lp-section-head">
+      <h2>Product Catalog</h2>
+      <p>Live stock from our verified suppliers · sign in to place an order</p>
+    </div>
+    <div class="cat-chips" id="catChips"></div>
+    <div class="shop-grid" id="catalogGrid"></div>
+  </section>
+
+  <!-- Features -->
+  <section class="lp-section" id="features" style="background:var(--bg);max-width:none">
+    <div style="max-width:1140px;margin:0 auto">
+      <div class="lp-section-head">
+        <h2>Built for B2B procurement</h2>
+        <p>Everything two businesses need to trade — buyer side and supplier side</p>
       </div>
+      <div class="lp-features">
+        <div class="feature-card"><div class="fic">🛍️</div><h3>Supplier Catalog</h3><p>Procurement browses live, material-coded inventory and orders in a click.</p></div>
+        <div class="feature-card"><div class="fic">📋</div><h3>Requisitions & POs</h3><p>Direct and indirect purchase orders with multi-tier approval routing.</p></div>
+        <div class="feature-card"><div class="fic">📦</div><h3>Supplier Inventory</h3><p>Suppliers manage live stock and material codes (AL 001, AL 002…).</p></div>
+        <div class="feature-card"><div class="fic">💳</div><h3>Invoices & Payments</h3><p>3-way matching, payment tracking and finance-grade reporting.</p></div>
+      </div>
+    </div>
+  </section>
 
-      <div class="login-stats">
-        <div class="ls-item"><div class="ls-val">8+</div><div class="ls-lbl">Suppliers</div></div>
-        <div class="ls-item"><div class="ls-val">100+</div><div class="ls-lbl">Orders</div></div>
-        <div class="ls-item"><div class="ls-val">RM 1.2M</div><div class="ls-lbl">Processed</div></div>
-        <div class="ls-item"><div class="ls-val">99.8%</div><div class="ls-lbl">Accuracy</div></div>
+  <!-- How it works -->
+  <section class="lp-section" id="how">
+    <div class="lp-section-head">
+      <h2>How it works</h2>
+      <p>Two businesses, one workflow</p>
+    </div>
+    <div class="lp-features">
+      <div class="feature-card"><div class="fic">1️⃣</div><h3>Browse</h3><p>Explore the public catalog and live stock.</p></div>
+      <div class="feature-card"><div class="fic">2️⃣</div><h3>Login</h3><p>Sign in as procurement, supplier, finance or admin.</p></div>
+      <div class="feature-card"><div class="fic">3️⃣</div><h3>Transact</h3><p>Raise POs, manage stock, match invoices — by role.</p></div>
+    </div>
+  </section>
+
+  <footer class="lp-footer">
+    P2P Solutions · Procure-to-Pay Platform · FIT2 Group 8 — University Mini Project 2026
+  </footer>
+
+  <!-- Product preview modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <span class="modal-title" id="pvTitle">Product</span>
+        <button class="modal-close" onclick="Modal.close('previewModal')">✕</button>
+      </div>
+      <div class="modal-body" id="pvBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="Modal.close('previewModal')">Close</button>
+        <a href="login.html" class="btn btn-primary">🔒 Login to Order</a>
       </div>
     </div>
   </div>
-
-  <!-- Right Form Panel -->
-  <div class="login-form-side">
-    <div class="login-form-box">
-      <h2>Welcome Back</h2>
-      <p>Sign in to access your procurement dashboard</p>
-
-      <!-- Role Selector -->
-      <div class="role-grid" id="roleGrid">
-        <div class="role-opt active" data-role="buyer" onclick="selectRole(this)">
-          <div class="role-ico">🛍️</div>
-          <div class="role-lbl">Buyer</div>
-        </div>
-        <div class="role-opt" data-role="seller" onclick="selectRole(this)">
-          <div class="role-ico">📦</div>
-          <div class="role-lbl">Seller</div>
-        </div>
-        <div class="role-opt" data-role="admin" onclick="selectRole(this)">
-          <div class="role-ico">👑</div>
-          <div class="role-lbl">Admin</div>
-        </div>
-      </div>
-
-      <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label class="form-label req">Email Address</label>
-          <input type="email" class="form-control" id="loginEmail" placeholder="your@company.com" required/>
-          <span class="form-error">Please enter a valid email</span>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label req">Password</label>
-          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required/>
-          <span class="form-error">Password is required</span>
-        </div>
-
-        <div class="d-flex align-center justify-between mb-16" style="margin-top:-4px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--text-muted);cursor:pointer">
-            <input type="checkbox" id="rememberMe"/> Remember me
-          </label>
-          <a href="#" style="font-size:0.75rem">Forgot password?</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-lg w-100" id="loginBtn">
-          Sign In →
-        </button>
-
-        <div id="loginError" style="display:none;margin-top:10px;padding:8px 12px;background:var(--danger-light);border-radius:6px;font-size:0.76rem;color:#991B1B;"></div>
-      </form>
-
-      <!-- Demo Credentials -->
-      <div class="login-demo" style="margin-top:20px;">
-        <div style="margin-bottom:8px;font-weight:600;color:var(--text-secondary);font-size:0.75rem">🔑 Demo Credentials</div>
-        <div id="demoCards" style="display:flex;flex-direction:column;gap:6px;text-align:left;">
-          <div class="demo-card" onclick="fillDemo('buyer@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">🛍️ Buyer:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> buyer@shop.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('seller@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">📦 Seller:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> seller@shop.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('admin@shop.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">👑 Admin:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> admin@shop.com / pass123</span>
-          </div>
-        </div>
-      </div>
-
-      <p style="text-align:center;font-size:0.7rem;color:var(--text-muted);margin-top:20px">
-        FIT2 Group 8 · University Mini Project · 2026
-      </p>
-    </div>
-  </div>
-
-</div>
 
 <script src="js/data.js"></script>
+<script src="js/utils.js"></script>
 <script>
-  // Check if already logged in
-  try {
-    const existing = JSON.parse(localStorage.getItem('p2p_user'));
-    if (existing) window.location.href = 'dashboard.html';
-  } catch(e) {}
+let products = [], activeCat = 'All';
 
-  let selectedRole = 'buyer';
-  const demos = { admin: 'admin@shop.com', buyer: 'buyer@shop.com', seller: 'seller@shop.com' };
-
-  function selectRole(el) {
-    document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('active'));
-    el.classList.add('active');
-    selectedRole = el.dataset.role;
-
-    // Auto-fill demo email based on role
-    document.getElementById('loginEmail').value = demos[selectedRole] || '';
-    document.getElementById('loginPassword').value = 'pass123';
+document.addEventListener('DOMContentLoaded', () => {
+  // If already logged in, swap auth buttons to dashboard
+  const user = Store.getUser();
+  if (user) {
+    const a = document.getElementById('navAuthBtn'); a.textContent = 'Dashboard →'; a.href = 'dashboard.html';
+    const h = document.getElementById('heroAuthBtn'); h.textContent = 'Go to Dashboard'; h.href = 'dashboard.html';
   }
+  products = Store.getProducts();
+  renderCats();
+  renderCatalog();
+});
 
-  function fillDemo(email, pass) {
-    document.getElementById('loginEmail').value = email;
-    document.getElementById('loginPassword').value = pass;
-    // Find role from email
-    const u = P2PData.users.find(u => u.email === email);
-    if (u) {
-      document.querySelectorAll('.role-opt').forEach(o => {
-        o.classList.toggle('active', o.dataset.role === u.role);
-      });
-      selectedRole = u.role;
-    }
-  }
+function renderCats() {
+  const cats = ['All', ...new Set(products.map(p => p.category))];
+  document.getElementById('catChips').innerHTML = cats.map(c =>
+    `<div class="cat-chip ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">${c}</div>`
+  ).join('');
+}
+function setCat(c) { activeCat = c; renderCats(); renderCatalog(); }
 
-  function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass  = document.getElementById('loginPassword').value;
-    const errEl = document.getElementById('loginError');
-    const btn   = document.getElementById('loginBtn');
+function stockClass(n) { return n === 0 ? 'out' : n <= 2 ? 'low' : 'ok'; }
+function stockLabel(n) { return n === 0 ? 'Out of stock' : `${n} in stock`; }
+function imgTag(p) { return p.image ? `<img src="${p.image}" alt="${p.name}"/>` : p.emoji; }
 
-    // Loading state
-    btn.textContent = 'Signing in…';
-    btn.disabled = true;
+function renderCatalog() {
+  const list = products.filter(p => activeCat === 'All' || p.category === activeCat);
+  document.getElementById('catalogGrid').innerHTML = list.map(p => {
+    const n = stockOf(p);
+    return `
+    <div class="product-card" onclick="preview('${p.id}')">
+      <div class="product-img">${imgTag(p)}</div>
+      <div class="product-info">
+        <div class="product-brand">${p.brand}</div>
+        <div class="product-name">${p.name}</div>
+        <span class="stock-badge ${stockClass(n)}">${stockLabel(n)}</span>
+        <div class="product-price">${Util.formatCurrency(p.price)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-    setTimeout(() => {
-      const user = P2PData.users.find(u => u.email === email && u.password === pass);
-      if (!user) {
-        errEl.textContent = 'Invalid email or password. Please try the demo credentials below.';
-        errEl.style.display = 'block';
-        btn.textContent = 'Sign In →';
-        btn.disabled = false;
-        return;
-      }
-      errEl.style.display = 'none';
-
-      // Save session
-      localStorage.setItem('p2p_user', JSON.stringify(user));
-      btn.textContent = '✓ Redirecting…';
-      btn.style.background = 'var(--success)';
-
-      setTimeout(() => window.location.href = 'dashboard.html', 600);
-    }, 800);
-  }
-
-  // Auto-fill buyer on load
-  document.getElementById('loginEmail').value = 'buyer@shop.com';
-  document.getElementById('loginPassword').value = 'pass123';
+function preview(id) {
+  const p = products.find(x => x.id === id);
+  const n = stockOf(p);
+  document.getElementById('pvTitle').textContent = p.name;
+  document.getElementById('pvBody').innerHTML = `
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="width:180px;height:130px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F8FAFC">${p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:4rem;text-align:center;line-height:130px">${p.emoji}</div>`}</div>
+      <div style="flex:1;min-width:200px">
+        <div class="product-brand">${p.brand} · ${p.category}</div>
+        <div style="font-size:1.2rem;font-weight:700;margin:4px 0">${p.name}</div>
+        <div class="product-price" style="font-size:1.6rem">${Util.formatCurrency(p.price)}</div>
+        <div class="stock-badge ${stockClass(n)}" style="font-size:0.8rem;margin-top:6px">${stockLabel(n)}</div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-top:12px">Supplied by a verified P2P Solutions partner. Sign in as procurement to raise a purchase order for this item.</p>
+      </div>
+    </div>`;
+  Modal.open('previewModal');
+}
 </script>
 </body>
 </html>

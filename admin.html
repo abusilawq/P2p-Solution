@@ -272,8 +272,9 @@
             <label class="form-label req">Role</label>
             <select class="form-control" name="role" required>
               <option value="">Select...</option>
-              <option value="buyer">Buyer</option>
-              <option value="seller">Seller (Supplier)</option>
+              <option value="procurement">Procurement</option>
+              <option value="finance">Finance</option>
+              <option value="supplier">Supplier</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -337,8 +338,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 let allUsers = [...P2PData.users];
 
 function renderUsers(list = allUsers) {
-  const roleLabel = { admin: 'Administrator', buyer: 'Buyer', seller: 'Seller (Supplier)' };
-  const roleBadge = { admin: 'badge-purple', buyer: 'badge-primary', seller: 'badge-warning' };
+  const roleLabel = { admin: 'Administrator', procurement: 'Procurement', finance: 'Finance', supplier: 'Supplier' };
+  const roleBadge = { admin: 'badge-purple', procurement: 'badge-primary', finance: 'badge-info', supplier: 'badge-warning' };
   document.getElementById('usersTbody').innerHTML = list.length ? list.map(u => `
     <tr>
       <td>
