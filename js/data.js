@@ -15,31 +15,72 @@ function _genUnits(prefix, total, sold = 0) {
 const P2PData = {
 
   /* ── AUTH ──────────────────────────────────────────────── */
-  /* Two businesses: ACME (the buyer org) and TechCore (a supplier) — true B2B */
+  /* ACME = the buyer organisation · each electronics brand is its own supplier */
   users: [
     { id: 'u-admin', name: 'Sarah Chen',   email: 'admin@acme.com',       password: 'pass123', role: 'admin',       dept: 'IT Administration',  avatar: '#2563EB', initials: 'SC' },
     { id: 'u-proc',  name: 'James Rivera',  email: 'procurement@acme.com', password: 'pass123', role: 'procurement', dept: 'Procurement',         avatar: '#10B981', initials: 'JR' },
     { id: 'u-fin',   name: 'Priya Nair',   email: 'finance@acme.com',     password: 'pass123', role: 'finance',     dept: 'Finance & Accounts', avatar: '#F59E0B', initials: 'PN' },
-    { id: 'u-sup',   name: 'Ali Hassan',   email: 'supplier@techcore.my', password: 'pass123', role: 'supplier',    dept: 'TechCore Solutions', avatar: '#8B5CF6', initials: 'AH', supplierId: 'SUP-001' },
+
+    /* Brand suppliers — each logs in to manage only their own catalog & stock */
+    { id: 'u-apple',   name: 'Apple Store',     brandName: 'Apple',   email: 'apple@supplier.com',   password: 'pass123', role: 'supplier', dept: 'Apple Inc.',            avatar: '#111827', initials: 'AP' },
+    { id: 'u-samsung', name: 'Samsung Sales',   brandName: 'Samsung', email: 'samsung@supplier.com', password: 'pass123', role: 'supplier', dept: 'Samsung Electronics',   avatar: '#1428A0', initials: 'SS' },
+    { id: 'u-asus',    name: 'ASUS Reseller',   brandName: 'Asus',    email: 'asus@supplier.com',    password: 'pass123', role: 'supplier', dept: 'ASUSTeK',               avatar: '#00539B', initials: 'AS' },
+    { id: 'u-hp',      name: 'HP Distributor',  brandName: 'HP',      email: 'hp@supplier.com',      password: 'pass123', role: 'supplier', dept: 'HP Inc.',               avatar: '#0096D6', initials: 'HP' },
+    { id: 'u-xiaomi',  name: 'Xiaomi Official',  brandName: 'Xiaomi',  email: 'xiaomi@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Xiaomi Corp.',         avatar: '#FF6900', initials: 'XM' },
+    { id: 'u-huawei',  name: 'Huawei Partner',  brandName: 'Huawei',  email: 'huawei@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Huawei Technologies',   avatar: '#CF0A2C', initials: 'HW' },
+    { id: 'u-lenovo',  name: 'Lenovo Store',    brandName: 'Lenovo',  email: 'lenovo@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Lenovo Group',          avatar: '#E2231A', initials: 'LN' },
+    { id: 'u-sony',    name: 'Sony Centre',     brandName: 'Sony',    email: 'sony@supplier.com',    password: 'pass123', role: 'supplier', dept: 'Sony Corp.',            avatar: '#000000', initials: 'SN' },
   ],
 
-  /* ── PRODUCTS / INVENTORY (Direct PO resale goods) ─────── */
+  /* ── PRODUCTS / INVENTORY (Direct PO resale goods) ─────────
+     image = real photo from the internet · fallback = bundled SVG  */
   products: [
-    { id: 'P-AL', category: 'Laptops',     brand: 'Asus',     name: 'Asus ProBook Laptop',  emoji: '💻', image: 'assets/products/laptop.svg',   materialPrefix: 'AL', price: 3200, sellerId: 'u-sup', units: _genUnits('AL', 10, 0) },
-    { id: 'P-DL', category: 'Laptops',     brand: 'Dell',     name: 'Dell Latitude Laptop', emoji: '💻', image: 'assets/products/laptop.svg',   materialPrefix: 'DL', price: 3800, sellerId: 'u-sup', units: _genUnits('DL', 6, 1)  },
-    { id: 'P-SP', category: 'Phones',      brand: 'Samsung',  name: 'Samsung Galaxy Phone', emoji: '📱', image: 'assets/products/phone.svg',    materialPrefix: 'SP', price: 2400, sellerId: 'u-sup', units: _genUnits('SP', 8, 2)  },
-    { id: 'P-AP', category: 'Phones',      brand: 'Apple',    name: 'Apple iPhone',         emoji: '📱', image: 'assets/products/phone.svg',    materialPrefix: 'AP', price: 4500, sellerId: 'u-sup', units: _genUnits('AP', 5, 0)  },
-    { id: 'P-MN', category: 'Monitors',    brand: 'Dell',     name: 'Dell 27" Monitor',     emoji: '🖥️', image: 'assets/products/monitor.svg',  materialPrefix: 'MN', price: 950,  sellerId: 'u-sup', units: _genUnits('MN', 7, 1)  },
-    { id: 'P-KB', category: 'Accessories', brand: 'Logitech', name: 'Logitech Keyboard',    emoji: '⌨️', image: 'assets/products/keyboard.svg', materialPrefix: 'KB', price: 180,  sellerId: 'u-sup', units: _genUnits('KB', 14, 4) },
-    { id: 'P-LM', category: 'Accessories', brand: 'Logitech', name: 'Logitech Wireless Mouse', emoji: '🖱️', image: 'assets/products/mouse.svg', materialPrefix: 'LM', price: 120,  sellerId: 'u-sup', units: _genUnits('LM', 12, 3) },
-    { id: 'P-AC', category: 'Accessories', brand: 'Anker',    name: 'Anker Fast Charger',   emoji: '🔌', image: 'assets/products/charger.svg',  materialPrefix: 'AC', price: 90,   sellerId: 'u-sup', units: _genUnits('AC', 4, 4)  },
+    /* Apple */
+    { id: 'AP-IPH', category: 'Phones',      brand: 'Apple',   name: 'iPhone 15 Pro',          emoji: '📱', image: 'https://loremflickr.com/600/400/iphone?lock=11',        fallback: 'assets/products/phone.svg',    materialPrefix: 'IPH', price: 4999, sellerId: 'u-apple',   units: _genUnits('IPH', 12, 2) },
+    { id: 'AP-MBP', category: 'Laptops',     brand: 'Apple',   name: 'MacBook Pro 14"',        emoji: '💻', image: 'https://loremflickr.com/600/400/macbook?lock=12',       fallback: 'assets/products/laptop.svg',   materialPrefix: 'MBP', price: 8999, sellerId: 'u-apple',   units: _genUnits('MBP', 8, 1) },
+    { id: 'AP-IPD', category: 'Tablets',     brand: 'Apple',   name: 'iPad Air',               emoji: '📲', image: 'https://loremflickr.com/600/400/ipad?lock=13',          fallback: 'assets/products/phone.svg',    materialPrefix: 'IPD', price: 3299, sellerId: 'u-apple',   units: _genUnits('IPD', 10, 0) },
+    { id: 'AP-APP', category: 'Audio',       brand: 'Apple',   name: 'AirPods Pro 2',          emoji: '🎧', image: 'https://loremflickr.com/600/400/airpods?lock=14',       fallback: 'assets/products/box.svg',      materialPrefix: 'APP', price: 999,  sellerId: 'u-apple',   units: _genUnits('APP', 20, 5) },
+
+    /* Samsung */
+    { id: 'SS-S24', category: 'Phones',      brand: 'Samsung', name: 'Galaxy S24 Ultra',       emoji: '📱', image: 'https://loremflickr.com/600/400/samsung,phone?lock=21', fallback: 'assets/products/phone.svg',    materialPrefix: 'GS', price: 4599, sellerId: 'u-samsung', units: _genUnits('GS', 14, 3) },
+    { id: 'SS-TAB', category: 'Tablets',     brand: 'Samsung', name: 'Galaxy Tab S9',          emoji: '📲', image: 'https://loremflickr.com/600/400/tablet?lock=22',        fallback: 'assets/products/phone.svg',    materialPrefix: 'GT', price: 2999, sellerId: 'u-samsung', units: _genUnits('GT', 9, 1) },
+    { id: 'SS-MON', category: 'Monitors',    brand: 'Samsung', name: 'Odyssey G7 27"',         emoji: '🖥️', image: 'https://loremflickr.com/600/400/monitor?lock=23',       fallback: 'assets/products/monitor.svg',  materialPrefix: 'OD', price: 1799, sellerId: 'u-samsung', units: _genUnits('OD', 7, 2) },
+
+    /* Asus */
+    { id: 'AS-ROG', category: 'Laptops',     brand: 'Asus',    name: 'ROG Strix G16',          emoji: '💻', image: 'https://loremflickr.com/600/400/gaming,laptop?lock=31', fallback: 'assets/products/laptop.svg',   materialPrefix: 'ROG', price: 6499, sellerId: 'u-asus',    units: _genUnits('ROG', 6, 1) },
+    { id: 'AS-ZEN', category: 'Laptops',     brand: 'Asus',    name: 'ZenBook 14 OLED',        emoji: '💻', image: 'https://loremflickr.com/600/400/laptop?lock=32',        fallback: 'assets/products/laptop.svg',   materialPrefix: 'ZEN', price: 4199, sellerId: 'u-asus',    units: _genUnits('ZEN', 11, 0) },
+    { id: 'AS-MON', category: 'Monitors',    brand: 'Asus',    name: 'TUF Gaming 27"',         emoji: '🖥️', image: 'https://loremflickr.com/600/400/computer,monitor?lock=33', fallback: 'assets/products/monitor.svg', materialPrefix: 'TUF', price: 1399, sellerId: 'u-asus',    units: _genUnits('TUF', 8, 2) },
+
+    /* HP */
+    { id: 'HP-SPC', category: 'Laptops',     brand: 'HP',      name: 'HP Spectre x360',        emoji: '💻', image: 'https://loremflickr.com/600/400/hp,laptop?lock=41',     fallback: 'assets/products/laptop.svg',   materialPrefix: 'SPC', price: 5299, sellerId: 'u-hp',      units: _genUnits('SPC', 7, 1) },
+    { id: 'HP-PAV', category: 'Laptops',     brand: 'HP',      name: 'HP Pavilion 15',         emoji: '💻', image: 'https://loremflickr.com/600/400/notebook?lock=42',      fallback: 'assets/products/laptop.svg',   materialPrefix: 'PAV', price: 2799, sellerId: 'u-hp',      units: _genUnits('PAV', 13, 3) },
+    { id: 'HP-PRN', category: 'Accessories', brand: 'HP',      name: 'HP LaserJet Printer',    emoji: '🖨️', image: 'https://loremflickr.com/600/400/printer?lock=43',       fallback: 'assets/products/box.svg',      materialPrefix: 'PRN', price: 1099, sellerId: 'u-hp',      units: _genUnits('PRN', 6, 0) },
+
+    /* Xiaomi */
+    { id: 'XM-14',  category: 'Phones',      brand: 'Xiaomi',  name: 'Xiaomi 14',              emoji: '📱', image: 'https://loremflickr.com/600/400/xiaomi,phone?lock=51',  fallback: 'assets/products/phone.svg',    materialPrefix: 'XM', price: 2899, sellerId: 'u-xiaomi',  units: _genUnits('XM', 16, 4) },
+    { id: 'XM-RN',  category: 'Phones',      brand: 'Xiaomi',  name: 'Redmi Note 13 Pro',      emoji: '📱', image: 'https://loremflickr.com/600/400/smartphone?lock=52',    fallback: 'assets/products/phone.svg',    materialPrefix: 'RN', price: 1299, sellerId: 'u-xiaomi',  units: _genUnits('RN', 22, 6) },
+    { id: 'XM-PB',  category: 'Accessories', brand: 'Xiaomi',  name: 'Mi Power Bank 20000',    emoji: '🔋', image: 'https://loremflickr.com/600/400/powerbank?lock=53',     fallback: 'assets/products/charger.svg',  materialPrefix: 'PB', price: 149,  sellerId: 'u-xiaomi',  units: _genUnits('PB', 30, 10) },
+    { id: 'XM-BUD', category: 'Audio',       brand: 'Xiaomi',  name: 'Redmi Buds 5 Pro',       emoji: '🎧', image: 'https://loremflickr.com/600/400/earbuds?lock=54',       fallback: 'assets/products/box.svg',      materialPrefix: 'BUD', price: 299,  sellerId: 'u-xiaomi',  units: _genUnits('BUD', 18, 3) },
+
+    /* Huawei */
+    { id: 'HW-P60', category: 'Phones',      brand: 'Huawei',  name: 'Huawei P60 Pro',         emoji: '📱', image: 'https://loremflickr.com/600/400/huawei,phone?lock=61',  fallback: 'assets/products/phone.svg',    materialPrefix: 'P60', price: 3699, sellerId: 'u-huawei',  units: _genUnits('P60', 9, 2) },
+    { id: 'HW-PAD', category: 'Tablets',     brand: 'Huawei',  name: 'Huawei MatePad 11',      emoji: '📲', image: 'https://loremflickr.com/600/400/tablet,device?lock=62', fallback: 'assets/products/phone.svg',    materialPrefix: 'MP', price: 2399, sellerId: 'u-huawei',  units: _genUnits('MP', 8, 1) },
+
+    /* Lenovo */
+    { id: 'LN-X1',  category: 'Laptops',     brand: 'Lenovo',  name: 'ThinkPad X1 Carbon',     emoji: '💻', image: 'https://loremflickr.com/600/400/thinkpad?lock=71',      fallback: 'assets/products/laptop.svg',   materialPrefix: 'X1', price: 6199, sellerId: 'u-lenovo',  units: _genUnits('X1', 7, 1) },
+    { id: 'LN-IDP', category: 'Laptops',     brand: 'Lenovo',  name: 'IdeaPad Slim 5',         emoji: '💻', image: 'https://loremflickr.com/600/400/lenovo,laptop?lock=72', fallback: 'assets/products/laptop.svg',   materialPrefix: 'IDP', price: 2599, sellerId: 'u-lenovo',  units: _genUnits('IDP', 12, 2) },
+
+    /* Sony */
+    { id: 'SN-XM5', category: 'Audio',       brand: 'Sony',    name: 'Sony WH-1000XM5',        emoji: '🎧', image: 'https://loremflickr.com/600/400/headphones?lock=81',    fallback: 'assets/products/box.svg',      materialPrefix: 'XM5', price: 1599, sellerId: 'u-sony',    units: _genUnits('XM5', 10, 3) },
+    { id: 'SN-BRV', category: 'Monitors',    brand: 'Sony',    name: 'Sony Bravia 32" Monitor',emoji: '🖥️', image: 'https://loremflickr.com/600/400/sony,display?lock=82',  fallback: 'assets/products/monitor.svg',  materialPrefix: 'BRV', price: 2199, sellerId: 'u-sony',    units: _genUnits('BRV', 6, 0) },
   ],
 
   /* ── ORDERS (procurement purchases from suppliers) ─────── */
   orders: [
-    { id: 'ORD-1001', buyerId: 'u-proc', productId: 'P-AL', productName: 'Asus ProBook Laptop',  code: 'AL 001', qty: 1, price: 3200, total: 3200, status: 'delivered', date: '2026-05-10' },
-    { id: 'ORD-1002', buyerId: 'u-proc', productId: 'P-SP', productName: 'Samsung Galaxy Phone', code: 'SP 001', qty: 1, price: 2400, total: 2400, status: 'in_transit', date: '2026-05-18' },
-    { id: 'ORD-1003', buyerId: 'u-proc', productId: 'P-LM', productName: 'Logitech Wireless Mouse', code: 'LM 001', qty: 1, price: 120, total: 120, status: 'completed', date: '2026-05-20' },
+    { id: 'ORD-1001', buyerId: 'u-proc', productId: 'AS-ZEN', productName: 'ZenBook 14 OLED', code: 'ZEN 001', qty: 1, price: 4199, total: 4199, status: 'delivered',  date: '2026-05-10' },
+    { id: 'ORD-1002', buyerId: 'u-proc', productId: 'SS-S24', productName: 'Galaxy S24 Ultra', code: 'GS 001',  qty: 1, price: 4599, total: 4599, status: 'in_transit', date: '2026-05-18' },
+    { id: 'ORD-1003', buyerId: 'u-proc', productId: 'XM-RN',  productName: 'Redmi Note 13 Pro', code: 'RN 001', qty: 1, price: 1299, total: 1299, status: 'completed',  date: '2026-05-20' },
+    { id: 'ORD-1004', buyerId: 'u-proc', productId: 'AP-IPH', productName: 'iPhone 15 Pro',     code: 'IPH 001', qty: 1, price: 4999, total: 4999, status: 'confirmed',  date: '2026-05-22' },
   ],
 
   /* ── SUPPLIERS ─────────────────────────────────────────── */

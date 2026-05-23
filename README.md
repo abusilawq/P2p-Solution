@@ -10,14 +10,14 @@ A complete, production-grade web platform that digitalizes the **entire purchasi
 
 ## Live Demo Login
 
-A **B2B Procure-to-Pay** platform between two businesses — **ACME** (the buyer org) and **TechCore** (a supplier).
+A **Procure-to-Pay** platform connecting **ACME** (the buyer organisation) with many electronics **brand suppliers** (Apple, Samsung, Asus, HP, Xiaomi, Huawei, Lenovo, Sony…), each with their own login.
 
-| Role            | Email                   | Password  | Can do                                                  |
-|-----------------|-------------------------|-----------|---------------------------------------------------------|
-| **Procurement** | procurement@acme.com    | `pass123` | Browse the supplier catalog, raise requisitions & POs, track orders |
-| **Supplier**    | supplier@techcore.my    | `pass123` | Manage live inventory & material codes, fulfil incoming orders |
-| **Finance**     | finance@acme.com        | `pass123` | Invoices, payments, spend reports                       |
-| **Admin**       | admin@acme.com          | `pass123` | Everything — catalog, inventory, full procure-to-pay    |
+| Role            | Email                                                   | Password  | Can do                                                  |
+|-----------------|---------------------------------------------------------|-----------|---------------------------------------------------------|
+| **Procurement** | procurement@acme.com                                    | `pass123` | Browse the catalog, raise requisitions & POs, track orders |
+| **Supplier**    | `apple@supplier.com`, `samsung@supplier.com`, `asus@supplier.com`, `hp@supplier.com`, `xiaomi@supplier.com`, `huawei@supplier.com`, `lenovo@supplier.com`, `sony@supplier.com` | `pass123` | Each brand logs in to manage **only its own** catalog, stock & material codes, sales and incoming orders |
+| **Finance**     | finance@acme.com                                        | `pass123` | Invoices, payments, spend reports                       |
+| **Admin**       | admin@acme.com                                          | `pass123` | Everything — catalog, all inventory, full procure-to-pay |
 
 > *Or just click any of the demo accounts pre-filled on the login screen.*
 
@@ -53,7 +53,7 @@ npx http-server -p 3000 -c-1
 
 ```
 p2p-solution/
-├── index.html              ← Public B2B landing page + product catalog (no login)
+├── index.html              ← Public landing page + product catalog (no login)
 ├── login.html              ← Login / Authentication (procurement · supplier · finance · admin)
 ├── dashboard.html          ← Role-aware dashboard (one per role)
 ├── shop.html               ← Supplier catalog — browse & raise purchase orders
@@ -88,7 +88,7 @@ p2p-solution/
 ## Modules — What Each Page Does
 
 ### 0. Landing (`index.html`)
-Public B2B home page — hero, a browse-only **product catalog** (with images & live stock), B2B
+Public home page — hero, a browse-only **product catalog** (with real images & live stock),
 feature highlights and a "how it works" flow. No login needed; "Login to Order" leads to `login.html`.
 
 ### 1. Login (`login.html`)

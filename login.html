@@ -24,10 +24,10 @@
       <a href="index.html" style="color:rgba(255,255,255,0.7);font-size:0.78rem;display:inline-block;margin-bottom:18px">← Back to home</a>
       <div class="lb-logo">🛒</div>
       <h1>P2P Solutions<br/>Procurement Platform</h1>
-      <p>One platform for the full business-to-business purchasing lifecycle — catalog, requisition, purchase orders, supplier inventory and payments.</p>
+      <p>One platform for the full procure-to-pay lifecycle — catalog, requisition, purchase orders, supplier inventory and payments.</p>
 
       <div class="lb-features">
-        <div class="lb-feat"><div class="lb-feat-ico">🛍️</div>B2B Product Catalog</div>
+        <div class="lb-feat"><div class="lb-feat-ico">🛍️</div>Multi-brand Product Catalog</div>
         <div class="lb-feat"><div class="lb-feat-ico">📋</div>Automated Requisitions & POs</div>
         <div class="lb-feat"><div class="lb-feat-ico">📦</div>Live Supplier Inventory & Stock</div>
         <div class="lb-feat"><div class="lb-feat-ico">🧾</div>Invoice Matching & Payments</div>
@@ -47,7 +47,7 @@
   <div class="login-form-side">
     <div class="login-form-box">
       <h2>Welcome Back</h2>
-      <p>Sign in to access your B2B dashboard</p>
+      <p>Sign in to access your dashboard</p>
 
       <!-- Role Selector -->
       <div class="role-grid" id="roleGrid" style="grid-template-columns:repeat(2,1fr)">
@@ -97,26 +97,11 @@
       </form>
 
       <!-- Demo Credentials -->
-      <div class="login-demo" style="margin-top:20px;">
-        <div style="margin-bottom:8px;font-weight:600;color:var(--text-secondary);font-size:0.75rem">🔑 Demo Credentials</div>
-        <div id="demoCards" style="display:flex;flex-direction:column;gap:6px;text-align:left;">
-          <div class="demo-card" onclick="fillDemo('procurement@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">🛒 Procurement:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> procurement@acme.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('supplier@techcore.my','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">📦 Supplier:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> supplier@techcore.my / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('finance@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">💰 Finance:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> finance@acme.com / pass123</span>
-          </div>
-          <div class="demo-card" onclick="fillDemo('admin@acme.com','pass123')" style="border:1px solid var(--border);border-radius:6px;padding:8px 12px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
-            <span style="font-size:0.72rem;font-weight:600;color:var(--text-primary)">👑 Admin:</span>
-            <span style="font-size:0.72rem;color:var(--text-muted)"> admin@acme.com / pass123</span>
-          </div>
-        </div>
+      <div class="login-demo" style="margin-top:18px;">
+        <div style="margin-bottom:6px;font-weight:600;color:var(--text-secondary);font-size:0.72rem">🏢 ACME (buyer) · password <code>pass123</code></div>
+        <div id="buyerCards" style="display:flex;gap:6px;flex-wrap:wrap;text-align:left;margin-bottom:10px"></div>
+        <div style="margin-bottom:6px;font-weight:600;color:var(--text-secondary);font-size:0.72rem">📦 Brand suppliers · each has its own login</div>
+        <div id="supplierCards" style="display:flex;gap:6px;flex-wrap:wrap;text-align:left;max-height:120px;overflow-y:auto"></div>
       </div>
 
       <p style="text-align:center;font-size:0.7rem;color:var(--text-muted);margin-top:20px">
@@ -136,7 +121,25 @@
   } catch(e) {}
 
   let selectedRole = 'procurement';
-  const demos = { admin: 'admin@acme.com', procurement: 'procurement@acme.com', finance: 'finance@acme.com', supplier: 'supplier@techcore.my' };
+  const demos = { admin: 'admin@acme.com', procurement: 'procurement@acme.com', finance: 'finance@acme.com', supplier: 'apple@supplier.com' };
+
+  // Build demo credential chips from the user list
+  function chip(u, icon) {
+    const label = u.brandName || u.role.charAt(0).toUpperCase() + u.role.slice(1);
+    return `<div class="demo-chip" onclick="fillDemo('${u.email}','pass123')"
+      style="border:1px solid var(--border);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:0.72rem;font-weight:600;color:var(--text-primary);transition:all .15s"
+      onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-primary)'">${icon} ${label}</div>`;
+  }
+  function renderDemoCards() {
+    const icons = { admin: '👑', procurement: '🛒', finance: '💰' };
+    document.getElementById('buyerCards').innerHTML = P2PData.users
+      .filter(u => ['procurement', 'finance', 'admin'].includes(u.role))
+      .map(u => chip(u, icons[u.role])).join('');
+    document.getElementById('supplierCards').innerHTML = P2PData.users
+      .filter(u => u.role === 'supplier')
+      .map(u => chip(u, '📦')).join('');
+  }
 
   function selectRole(el) {
     document.querySelectorAll('.role-opt').forEach(o => o.classList.remove('active'));
@@ -183,9 +186,10 @@
     }, 800);
   }
 
-  // Auto-fill procurement on load
+  // Auto-fill procurement on load + render demo chips
   document.getElementById('loginEmail').value = 'procurement@acme.com';
   document.getElementById('loginPassword').value = 'pass123';
+  renderDemoCards();
 </script>
 </body>
 </html>
