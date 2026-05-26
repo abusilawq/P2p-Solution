@@ -177,7 +177,7 @@
           </div>
           <div id="lineItems">
             <div class="line-item-row" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end;">
-              <div><label class="form-label req">Item Description</label><input class="form-control item-desc" placeholder="e.g. Dell Laptop 15" required/></div>
+              <div><label class="form-label req">Item Description</label><select class="form-control item-desc" onchange="onProductSelect(this)" required><option value="">— select a product —</option></select></div>
               <div><label class="form-label req">Qty</label><input type="number" class="form-control item-qty" value="1" min="1" onchange="calcLineTotal(this)"/></div>
               <div><label class="form-label req">Unit Price (RM)</label><input type="number" class="form-control item-price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"/></div>
               <div><label class="form-label">Total (RM)</label><input class="form-control item-total" readonly style="background:var(--bg)"/></div>
@@ -245,6 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadReqs();
   // Set min date
   document.getElementById('reqDate').min = Util.today();
+  // Populate initial line item product select
+  fillProductSelect(document.querySelector('.item-desc'));
 });
 
 function loadReqs() {
@@ -438,16 +440,42 @@ function updateApprovalInfo() {
   el.style.display = 'block';
 }
 
+function buildProductOptions() {
+  return P2PData.products.map(p =>
+    `<option value="${p.name}" data-price="${p.price}">${p.emoji} ${p.brand} — ${p.name} (RM ${p.price.toLocaleString()})</option>`
+  ).join('');
+}
+
+function fillProductSelect(sel) {
+  sel.innerHTML = '<option value="">— select a product —</option>' + buildProductOptions();
+}
+
+function onProductSelect(sel) {
+  const opt = sel.selectedOptions[0];
+  const price = opt ? parseFloat(opt.dataset.price) || 0 : 0;
+  const row = sel.closest('.line-item-row');
+  const priceInput = row.querySelector('.item-price');
+  priceInput.value = price.toFixed(2);
+  calcLineTotal(priceInput);
+}
+
 function addLineItem() {
   const row = document.createElement('div');
   row.className = 'line-item-row';
   row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end';
+  const sel = document.createElement('select');
+  sel.className = 'form-control item-desc';
+  sel.setAttribute('onchange', 'onProductSelect(this)');
+  sel.required = true;
+  fillProductSelect(sel);
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(sel);
   row.innerHTML = `
-    <div><input class="form-control item-desc" placeholder="Item description"/></div>
     <div><input type="number" class="form-control item-qty" value="1" min="1" onchange="calcLineTotal(this)"/></div>
     <div><input type="number" class="form-control item-price" value="0" min="0" step="0.01" onchange="calcLineTotal(this)"/></div>
     <div><input class="form-control item-total" readonly style="background:var(--bg)"/></div>
     <div><button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.line-item-row').remove();updateItemsTotal()">✕</button></div>`;
+  row.insertBefore(wrapper, row.firstChild);
   document.getElementById('lineItems').appendChild(row);
 }
 

@@ -20,7 +20,7 @@
         </div>
         <div class="page-header-actions">
           <button class="btn btn-secondary" onclick="exportInvoices()">⬇ Export</button>
-          <button class="btn btn-primary" onclick="Modal.open('newInvModal')">+ Add Invoice</button>
+          <button class="btn btn-primary" onclick="openNewInvoice()">+ Add Invoice</button>
         </div>
       </div>
 
@@ -104,8 +104,8 @@
     <div class="modal-body">
       <form id="invForm">
         <div class="form-group">
-          <label class="form-label req">Invoice Number</label>
-          <input class="form-control" id="invNum" placeholder="INV-XXXX-XXXX" required/>
+          <label class="form-label">Invoice Number</label>
+          <input class="form-control" id="invNum" readonly style="background:var(--bg);color:var(--text-muted);font-family:monospace" title="Auto-generated"/>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -267,6 +267,14 @@ function calcTax() {
   document.getElementById('invTax').value = (amt*0.06).toFixed(2);
 }
 
+function openNewInvoice() {
+  const year = new Date().getFullYear();
+  const existing = Store.getInvoices().filter(i => i.id.startsWith(`INV-${year}-`));
+  const seq = String(existing.length + 1).padStart(4, '0');
+  document.getElementById('invNum').value = `INV-${year}-${seq}`;
+  Modal.open('newInvModal');
+}
+
 function populateDropdowns() {
   const poSel = document.getElementById('invPO');
   Store.getPOs().forEach(po => {
@@ -283,7 +291,7 @@ function saveInvoice() {
   const supId   = document.getElementById('invSupplier').value;
   const amount  = parseFloat(document.getElementById('invAmount').value);
   const due     = document.getElementById('invDue').value;
-  if (!num||!supId||!amount||!due) { Toast.warning('Validation','Fill all required fields.'); return; }
+  if (!supId||!amount||!due) { Toast.warning('Validation','Fill all required fields.'); return; }
 
   const sup  = Store.getSuppliers().find(s=>s.id===supId);
   const poId = document.getElementById('invPO').value;
