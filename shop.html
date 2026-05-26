@@ -137,19 +137,36 @@ function raisePO(id) {
 
   const user = Store.getUser();
   const seller = P2PData.users.find(u => u.id === p.sellerId);
+  const sup = P2PData.suppliers.find(s => s.userId === p.sellerId);
+  const supName = sup ? sup.name : (seller ? seller.brandName : 'Supplier');
+  const supId = sup ? sup.id : (seller ? seller.supplierId : null);
+  const stamp = Date.now().toString().slice(-6);
+
+  // Record the order (procurement ↔ supplier tracker)
   const orders = Store.getOrders();
   orders.unshift({
-    id: 'ORD-' + Date.now().toString().slice(-6),
-    type: 'direct', buyerId: user.id, supplierId: seller ? seller.supplierId : null,
+    id: 'ORD-' + stamp,
+    type: 'direct', buyerId: user.id, supplierId: supId,
     productId: p.id, productName: p.name,
     code: unit.code, qty: 1, price: p.price, total: p.price,
     status: 'confirmed', date: Util.today(),
   });
   Store.saveOrders(orders);
 
+  // Create the matching Purchase Order (procurement ↔ finance flow)
+  const pos = Store.getPOs();
+  pos.unshift({
+    id: 'PO-' + stamp,
+    type: 'direct', prId: null, supplier: supName, supId,
+    buyerId: user.id, materialCode: unit.code, productId: p.id,
+    amount: p.price, status: 'confirmed', created: Util.today(),
+    delivery: Util.addDays(Util.today(), 7), approvedBy: user.name, payStatus: 'pending',
+  });
+  Store.savePOs(pos);
+
   products = all;
   Modal.close('productModal');
-  Toast.success('Purchase Order raised', `Direct PO for ${p.name} (${unit.code}) — ${Util.formatCurrency(p.price)} sent to the supplier.`);
+  Toast.success('Purchase Order raised', `Direct PO for ${p.name} (${unit.code}) — ${Util.formatCurrency(p.price)} sent to ${supName}.`);
   renderShop();
 }
 </script>

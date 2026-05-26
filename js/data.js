@@ -22,14 +22,14 @@ const P2PData = {
     { id: 'u-fin',   name: 'Priya Nair',   email: 'finance@acme.com',     password: 'pass123', role: 'finance',     dept: 'Finance & Accounts', avatar: '#F59E0B', initials: 'PN' },
 
     /* Brand suppliers — each logs in to manage only their own catalog & stock */
-    { id: 'u-apple',   name: 'Apple Store',     brandName: 'Apple',   email: 'apple@supplier.com',   password: 'pass123', role: 'supplier', dept: 'Apple Inc.',            avatar: '#111827', initials: 'AP' },
-    { id: 'u-samsung', name: 'Samsung Sales',   brandName: 'Samsung', email: 'samsung@supplier.com', password: 'pass123', role: 'supplier', dept: 'Samsung Electronics',   avatar: '#1428A0', initials: 'SS' },
-    { id: 'u-asus',    name: 'ASUS Reseller',   brandName: 'Asus',    email: 'asus@supplier.com',    password: 'pass123', role: 'supplier', dept: 'ASUSTeK',               avatar: '#00539B', initials: 'AS' },
-    { id: 'u-hp',      name: 'HP Distributor',  brandName: 'HP',      email: 'hp@supplier.com',      password: 'pass123', role: 'supplier', dept: 'HP Inc.',               avatar: '#0096D6', initials: 'HP' },
-    { id: 'u-xiaomi',  name: 'Xiaomi Official',  brandName: 'Xiaomi',  email: 'xiaomi@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Xiaomi Corp.',         avatar: '#FF6900', initials: 'XM' },
-    { id: 'u-huawei',  name: 'Huawei Partner',  brandName: 'Huawei',  email: 'huawei@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Huawei Technologies',   avatar: '#CF0A2C', initials: 'HW' },
-    { id: 'u-lenovo',  name: 'Lenovo Store',    brandName: 'Lenovo',  email: 'lenovo@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Lenovo Group',          avatar: '#E2231A', initials: 'LN' },
-    { id: 'u-sony',    name: 'Sony Centre',     brandName: 'Sony',    email: 'sony@supplier.com',    password: 'pass123', role: 'supplier', dept: 'Sony Corp.',            avatar: '#000000', initials: 'SN' },
+    { id: 'u-apple',   name: 'Apple Store',     brandName: 'Apple',   supplierId: 'SUP-APPLE',   email: 'apple@supplier.com',   password: 'pass123', role: 'supplier', dept: 'Apple Inc.',            avatar: '#111827', initials: 'AP' },
+    { id: 'u-samsung', name: 'Samsung Sales',   brandName: 'Samsung', supplierId: 'SUP-SAMSUNG', email: 'samsung@supplier.com', password: 'pass123', role: 'supplier', dept: 'Samsung Electronics',   avatar: '#1428A0', initials: 'SS' },
+    { id: 'u-asus',    name: 'ASUS Reseller',   brandName: 'Asus',    supplierId: 'SUP-ASUS',    email: 'asus@supplier.com',    password: 'pass123', role: 'supplier', dept: 'ASUSTeK',               avatar: '#00539B', initials: 'AS' },
+    { id: 'u-hp',      name: 'HP Distributor',  brandName: 'HP',      supplierId: 'SUP-HP',      email: 'hp@supplier.com',      password: 'pass123', role: 'supplier', dept: 'HP Inc.',               avatar: '#0096D6', initials: 'HP' },
+    { id: 'u-xiaomi',  name: 'Xiaomi Official',  brandName: 'Xiaomi',  supplierId: 'SUP-XIAOMI',  email: 'xiaomi@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Xiaomi Corp.',         avatar: '#FF6900', initials: 'XM' },
+    { id: 'u-huawei',  name: 'Huawei Partner',  brandName: 'Huawei',  supplierId: 'SUP-HUAWEI',  email: 'huawei@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Huawei Technologies',   avatar: '#CF0A2C', initials: 'HW' },
+    { id: 'u-lenovo',  name: 'Lenovo Store',    brandName: 'Lenovo',  supplierId: 'SUP-LENOVO',  email: 'lenovo@supplier.com',  password: 'pass123', role: 'supplier', dept: 'Lenovo Group',          avatar: '#E2231A', initials: 'LN' },
+    { id: 'u-sony',    name: 'Sony Centre',     brandName: 'Sony',    supplierId: 'SUP-SONY',    email: 'sony@supplier.com',    password: 'pass123', role: 'supplier', dept: 'Sony Corp.',            avatar: '#000000', initials: 'SN' },
   ],
 
   /* ── PRODUCTS / INVENTORY (Direct PO resale goods) ─────────
@@ -83,95 +83,93 @@ const P2PData = {
     { id: 'ORD-1004', buyerId: 'u-proc', productId: 'AP-IPH', productName: 'iPhone 15 Pro',     code: 'IPH 001', qty: 1, price: 4999, total: 4999, status: 'confirmed',  date: '2026-05-22' },
   ],
 
-  /* ── SUPPLIERS ─────────────────────────────────────────── */
+  /* ── SUPPLIERS (the brands that log in & supply the catalog) ── */
   suppliers: [
-    { id: 'SUP-001', name: 'TechCore Solutions Sdn Bhd',   contact: 'Ali Hassan',    email: 'ali@techcore.my',       phone: '+60 3-1234 5678', category: 'IT Hardware',    status: 'active',   rating: 4.8, city: 'Kuala Lumpur', country: 'Malaysia', taxId: 'MY-TC-89023', payment: 'Net 30',  totalOrders: 42, totalValue: 215400, joined: '2022-03-14' },
-    { id: 'SUP-002', name: 'GlobalOffice Supplies Bhd',    contact: 'Lee Mei Ling',  email: 'meiLing@gos.com.my',   phone: '+60 3-2345 6789', category: 'Office Supplies',status: 'active',   rating: 4.5, city: 'Petaling Jaya',country: 'Malaysia', taxId: 'MY-GO-40112', payment: 'Net 15',  totalOrders: 118, totalValue: 86200, joined: '2021-07-01' },
-    { id: 'SUP-003', name: 'Nexgen Cloud Services Ltd',    contact: 'Ravi Kumar',    email: 'ravi@nexgen.io',        phone: '+65 9876 5432',   category: 'Cloud & SaaS',  status: 'active',   rating: 4.9, city: 'Singapore',    country: 'Singapore', taxId: 'SG-NG-30987', payment: 'Net 30',  totalOrders: 28, totalValue: 432000, joined: '2023-01-20' },
-    { id: 'SUP-004', name: 'QuickPrint & Packaging Co.',  contact: 'Fatimah Yusof', email: 'fatimah@quickprint.my', phone: '+60 3-3456 7890', category: 'Printing',       status: 'inactive', rating: 3.9, city: 'Shah Alam',    country: 'Malaysia', taxId: 'MY-QP-55631', payment: 'Net 45',  totalOrders: 15, totalValue: 23100, joined: '2022-11-10' },
-    { id: 'SUP-005', name: 'Acme Logistics & Freight',    contact: 'Danny Tan',     email: 'danny@acmelogistics.com',phone:'+60 4-4567 8901',  category: 'Logistics',      status: 'active',   rating: 4.3, city: 'Penang',       country: 'Malaysia', taxId: 'MY-AL-71240', payment: 'Net 30',  totalOrders: 67, totalValue: 156800, joined: '2021-02-28' },
-    { id: 'SUP-006', name: 'Vertex Industrial Equipment', contact: 'Omar Said',     email: 'omar@vertex-ind.com',   phone: '+60 5-5678 9012', category: 'Equipment',      status: 'active',   rating: 4.6, city: 'Johor Bahru',  country: 'Malaysia', taxId: 'MY-VI-66503', payment: 'Net 60',  totalOrders: 19, totalValue: 348000, joined: '2022-05-18' },
-    { id: 'SUP-007', name: 'SafeGuard Security Systems',  contact: 'Lim Wei Jie',   email: 'wei@safeguard.my',      phone: '+60 3-6789 0123', category: 'Security',       status: 'pending',  rating: 4.1, city: 'Subang Jaya',  country: 'Malaysia', taxId: 'MY-SG-82441', payment: 'Net 30',  totalOrders: 8,  totalValue: 78500, joined: '2024-02-12' },
-    { id: 'SUP-008', name: 'PrimeMed Healthcare Supplies',contact: 'Dr. Ananya Das', email: 'ananya@primemed.in',   phone: '+91 98765 43210', category: 'Medical',        status: 'active',   rating: 4.7, city: 'Bangalore',    country: 'India',    taxId: 'IN-PM-34511', payment: 'Net 15',  totalOrders: 33, totalValue: 112000, joined: '2023-06-01' },
+    { id: 'SUP-APPLE',   userId: 'u-apple',   name: 'Apple Inc.',            contact: 'Apple Store',    email: 'apple@supplier.com',   phone: '+1 800-275-2273', category: 'Electronics', status: 'active', rating: 4.9, city: 'Cupertino',  country: 'USA',     taxId: 'US-APL-0001', payment: 'Net 30', totalOrders: 38, totalValue: 412000, joined: '2022-01-10' },
+    { id: 'SUP-SAMSUNG', userId: 'u-samsung', name: 'Samsung Electronics',   contact: 'Samsung Sales',  email: 'samsung@supplier.com', phone: '+82 2-2255-0114', category: 'Electronics', status: 'active', rating: 4.8, city: 'Suwon',      country: 'South Korea', taxId: 'KR-SMS-0002', payment: 'Net 30', totalOrders: 31, totalValue: 286000, joined: '2022-02-18' },
+    { id: 'SUP-ASUS',    userId: 'u-asus',    name: 'ASUSTeK Computer',      contact: 'ASUS Reseller',  email: 'asus@supplier.com',    phone: '+886 2-2894-3447',category: 'Electronics', status: 'active', rating: 4.7, city: 'Taipei',     country: 'Taiwan',  taxId: 'TW-ASU-0003', payment: 'Net 45', totalOrders: 24, totalValue: 198000, joined: '2022-05-02' },
+    { id: 'SUP-HP',      userId: 'u-hp',      name: 'HP Inc.',               contact: 'HP Distributor', email: 'hp@supplier.com',      phone: '+1 650-857-1501', category: 'Electronics', status: 'active', rating: 4.6, city: 'Palo Alto',  country: 'USA',     taxId: 'US-HP-0004',  payment: 'Net 30', totalOrders: 27, totalValue: 164000, joined: '2021-11-20' },
+    { id: 'SUP-XIAOMI',  userId: 'u-xiaomi',  name: 'Xiaomi Corporation',    contact: 'Xiaomi Official',email: 'xiaomi@supplier.com',  phone: '+86 400-100-5678',category: 'Electronics', status: 'active', rating: 4.7, city: 'Beijing',    country: 'China',   taxId: 'CN-XMI-0005', payment: 'Net 30', totalOrders: 42, totalValue: 152000, joined: '2023-01-15' },
+    { id: 'SUP-HUAWEI',  userId: 'u-huawei',  name: 'Huawei Technologies',   contact: 'Huawei Partner', email: 'huawei@supplier.com',  phone: '+86 755-2878-0808',category:'Electronics', status: 'active', rating: 4.5, city: 'Shenzhen',   country: 'China',   taxId: 'CN-HWI-0006', payment: 'Net 45', totalOrders: 17, totalValue: 121000, joined: '2023-03-08' },
+    { id: 'SUP-LENOVO',  userId: 'u-lenovo',  name: 'Lenovo Group',          contact: 'Lenovo Store',   email: 'lenovo@supplier.com',  phone: '+86 400-100-6000',category: 'Electronics', status: 'active', rating: 4.6, city: 'Beijing',    country: 'China',   taxId: 'CN-LNV-0007', payment: 'Net 30', totalOrders: 21, totalValue: 178000, joined: '2022-07-19' },
+    { id: 'SUP-SONY',    userId: 'u-sony',    name: 'Sony Corporation',      contact: 'Sony Centre',    email: 'sony@supplier.com',    phone: '+81 3-6748-2111', category: 'Electronics', status: 'active', rating: 4.7, city: 'Tokyo',      country: 'Japan',   taxId: 'JP-SNY-0008', payment: 'Net 60', totalOrders: 14, totalValue: 96000,  joined: '2022-09-30' },
   ],
 
-  /* ── PURCHASE REQUISITIONS ─────────────────────────────── */
+  /* ── PURCHASE REQUISITIONS (ACME procurement requests) ─── */
   requisitions: [
-    { id: 'PR-2025-0142', title: 'Laptop Procurement for Engineering Team',       dept: 'Engineering',      requester: 'James Rivera', amount: 45600, status: 'approved',  priority: 'high',   category: 'IT Hardware',    created: '2025-04-01', approvedBy: 'Sarah Chen',  items: 12 },
-    { id: 'PR-2025-0141', type: 'indirect', title: 'Office Stationery & Supplies Q2',              dept: 'Admin',            requester: 'Tom Bradley',  amount:  3200, status: 'pending',   priority: 'low',    category: 'Office Supplies',created: '2025-04-02', approvedBy: null,          items: 28 },
-    { id: 'PR-2025-0140', type: 'indirect', title: 'Cloud Storage Upgrade — AWS S3',               dept: 'IT',               requester: 'James Rivera', amount: 18000, status: 'approved',  priority: 'medium', category: 'Cloud & SaaS',  created: '2025-03-28', approvedBy: 'Sarah Chen',  items: 1  },
-    { id: 'PR-2025-0139', title: 'Industrial Safety Equipment & PPE',            dept: 'Operations',       requester: 'Tom Bradley',  amount: 12800, status: 'rejected',  priority: 'high',   category: 'Equipment',      created: '2025-03-25', approvedBy: 'Sarah Chen',  items: 45 },
-    { id: 'PR-2025-0138', title: 'Marketing Printing Materials — Q2 Campaign',  dept: 'Marketing',        requester: 'James Rivera', amount:  5400, status: 'approved',  priority: 'medium', category: 'Printing',       created: '2025-03-22', approvedBy: 'Priya Nair',  items: 6  },
-    { id: 'PR-2025-0137', title: 'Server Infrastructure Upgrade',                dept: 'IT',               requester: 'Tom Bradley',  amount: 87500, status: 'pending',   priority: 'high',   category: 'IT Hardware',    created: '2025-03-20', approvedBy: null,          items: 8  },
-    { id: 'PR-2025-0136', type: 'indirect', title: 'Annual Freight Contract Renewal',              dept: 'Logistics',        requester: 'James Rivera', amount: 36000, status: 'approved',  priority: 'medium', category: 'Logistics',      created: '2025-03-18', approvedBy: 'Priya Nair',  items: 1  },
-    { id: 'PR-2025-0135', type: 'indirect', title: 'HR Software License Subscription',             dept: 'Human Resources',  requester: 'Tom Bradley',  amount:  9600, status: 'approved',  priority: 'low',    category: 'Cloud & SaaS',  created: '2025-03-15', approvedBy: 'Sarah Chen',  items: 1  },
-    { id: 'PR-2025-0134', title: 'Security CCTV System Upgrade',                 dept: 'Security',         requester: 'James Rivera', amount: 22400, status: 'pending',   priority: 'medium', category: 'Security',       created: '2025-04-03', approvedBy: null,          items: 15 },
-    { id: 'PR-2025-0133', title: 'Medical Supplies for First Aid Stations',      dept: 'HR',               requester: 'Tom Bradley',  amount:  4100, status: 'approved',  priority: 'low',    category: 'Medical',        created: '2025-04-04', approvedBy: 'Priya Nair',  items: 22 },
+    { id: 'PR-2025-0142', type: 'direct',   title: 'iPhone 15 Pro — resale stock',        dept: 'Sales',        requester: 'James Rivera', amount: 49990, status: 'approved', priority: 'high',   category: 'Phones',      created: '2026-05-01', approvedBy: 'Sarah Chen', items: 10 },
+    { id: 'PR-2025-0141', type: 'indirect', title: 'Microsoft 365 licenses (annual)',     dept: 'IT',           requester: 'James Rivera', amount:  3200, status: 'pending',  priority: 'low',    category: 'Software',    created: '2026-05-02', approvedBy: null,         items: 25 },
+    { id: 'PR-2025-0140', type: 'direct',   title: 'Galaxy S24 Ultra — resale stock',     dept: 'Sales',        requester: 'James Rivera', amount: 45990, status: 'approved', priority: 'medium', category: 'Phones',      created: '2026-04-28', approvedBy: 'Sarah Chen', items: 10 },
+    { id: 'PR-2025-0139', type: 'direct',   title: 'ASUS ROG Strix gaming laptops',       dept: 'Sales',        requester: 'James Rivera', amount: 64990, status: 'rejected', priority: 'high',   category: 'Laptops',     created: '2026-04-25', approvedBy: 'Sarah Chen', items: 10 },
+    { id: 'PR-2025-0138', type: 'direct',   title: 'Xiaomi Redmi Note 13 Pro — bulk',     dept: 'Sales',        requester: 'James Rivera', amount: 25980, status: 'approved', priority: 'medium', category: 'Phones',      created: '2026-04-22', approvedBy: 'Priya Nair', items: 20 },
+    { id: 'PR-2025-0137', type: 'direct',   title: 'Lenovo ThinkPad X1 fleet',            dept: 'Sales',        requester: 'James Rivera', amount: 61990, status: 'pending',  priority: 'high',   category: 'Laptops',     created: '2026-04-20', approvedBy: null,         items: 10 },
+    { id: 'PR-2025-0136', type: 'indirect', title: 'Warehouse logistics contract',        dept: 'Operations',   requester: 'James Rivera', amount: 18000, status: 'approved', priority: 'medium', category: 'Logistics',   created: '2026-04-18', approvedBy: 'Priya Nair', items: 1  },
+    { id: 'PR-2025-0135', type: 'direct',   title: 'Sony WH-1000XM5 headphones',          dept: 'Sales',        requester: 'James Rivera', amount: 15990, status: 'approved', priority: 'low',    category: 'Audio',       created: '2026-04-15', approvedBy: 'Sarah Chen', items: 10 },
+    { id: 'PR-2025-0134', type: 'direct',   title: 'HP LaserJet printers for office',     dept: 'Admin',        requester: 'James Rivera', amount:  6594, status: 'pending',  priority: 'medium', category: 'Accessories', created: '2026-05-03', approvedBy: null,         items: 6  },
+    { id: 'PR-2025-0133', type: 'direct',   title: 'iPad Air — retail demo units',        dept: 'Sales',        requester: 'James Rivera', amount: 32990, status: 'approved', priority: 'low',    category: 'Tablets',     created: '2026-05-04', approvedBy: 'Priya Nair', items: 10 },
   ],
 
-  /* ── PURCHASE ORDERS ───────────────────────────────────── */
+  /* ── PURCHASE ORDERS (ACME → brand suppliers) ──────────── */
   purchaseOrders: [
-    { id: 'PO-2025-0098', prId: 'PR-2025-0142', supplier: 'TechCore Solutions Sdn Bhd',  supId: 'SUP-001', amount: 45600, status: 'delivered', created: '2025-04-04', delivery: '2025-04-12', approvedBy: 'Priya Nair',   payStatus: 'paid'     },
-    { id: 'PO-2025-0097', type: 'indirect', prId: 'PR-2025-0140', supplier: 'Nexgen Cloud Services Ltd',   supId: 'SUP-003', amount: 18000, status: 'confirmed', created: '2025-03-30', delivery: '2025-04-15', approvedBy: 'Priya Nair',   payStatus: 'pending'  },
-    { id: 'PO-2025-0096', prId: 'PR-2025-0138', supplier: 'QuickPrint & Packaging Co.', supId: 'SUP-004', amount:  5400, status: 'delivered', created: '2025-03-24', delivery: '2025-04-01', approvedBy: 'Sarah Chen',   payStatus: 'paid'     },
-    { id: 'PO-2025-0095', type: 'indirect', prId: 'PR-2025-0136', supplier: 'Acme Logistics & Freight',   supId: 'SUP-005', amount: 36000, status: 'confirmed', created: '2025-03-20', delivery: '2025-03-31', approvedBy: 'Priya Nair',   payStatus: 'overdue'  },
-    { id: 'PO-2025-0094', type: 'indirect', prId: 'PR-2025-0135', supplier: 'Nexgen Cloud Services Ltd',   supId: 'SUP-003', amount:  9600, status: 'delivered', created: '2025-03-16', delivery: '2025-03-20', approvedBy: 'Sarah Chen',   payStatus: 'paid'     },
-    { id: 'PO-2025-0093', prId: 'PR-2025-0133', supplier: 'PrimeMed Healthcare Supplies',supId:'SUP-008', amount:  4100, status: 'in_transit',created: '2025-04-05', delivery: '2025-04-18', approvedBy: 'Priya Nair',   payStatus: 'pending'  },
-    { id: 'PO-2025-0092', prId: 'PR-2025-0134', supplier: 'SafeGuard Security Systems',  supId: 'SUP-007', amount: 22400, status: 'pending',   created: '2025-04-04', delivery: '2025-04-25', approvedBy: null,           payStatus: 'pending'  },
+    { id: 'PO-2025-0098', type: 'direct',   prId: 'PR-2025-0142', supplier: 'Apple Inc.',          supId: 'SUP-APPLE',   buyerId: 'u-proc', materialCode: 'IPH 001', amount: 49990, status: 'delivered',  created: '2026-05-04', delivery: '2026-05-12', approvedBy: 'Priya Nair', payStatus: 'paid'    },
+    { id: 'PO-2025-0097', type: 'direct',   prId: 'PR-2025-0140', supplier: 'Samsung Electronics', supId: 'SUP-SAMSUNG', buyerId: 'u-proc', materialCode: 'GS 002',  amount: 45990, status: 'confirmed',  created: '2026-04-30', delivery: '2026-05-15', approvedBy: 'Priya Nair', payStatus: 'pending' },
+    { id: 'PO-2025-0096', type: 'direct',   prId: 'PR-2025-0138', supplier: 'Xiaomi Corporation',  supId: 'SUP-XIAOMI',  buyerId: 'u-proc', materialCode: 'RN 003',  amount: 25980, status: 'delivered',  created: '2026-04-24', delivery: '2026-05-01', approvedBy: 'Sarah Chen', payStatus: 'paid'    },
+    { id: 'PO-2025-0095', type: 'direct',   prId: 'PR-2025-0135', supplier: 'Sony Corporation',    supId: 'SUP-SONY',    buyerId: 'u-proc', materialCode: 'XM5 001', amount: 15990, status: 'confirmed',  created: '2026-04-20', delivery: '2026-04-30', approvedBy: 'Priya Nair', payStatus: 'overdue' },
+    { id: 'PO-2025-0094', type: 'direct',   prId: 'PR-2025-0133', supplier: 'Apple Inc.',          supId: 'SUP-APPLE',   buyerId: 'u-proc', materialCode: 'IPD 002', amount: 32990, status: 'delivered',  created: '2026-04-16', delivery: '2026-04-20', approvedBy: 'Sarah Chen', payStatus: 'paid'    },
+    { id: 'PO-2025-0093', type: 'indirect', prId: 'PR-2025-0136', supplier: 'Apple Inc.',          supId: 'SUP-APPLE',   buyerId: 'u-proc', materialCode: null,      amount: 18000, status: 'in_transit', created: '2026-05-05', delivery: '2026-05-18', approvedBy: 'Priya Nair', payStatus: 'pending' },
+    { id: 'PO-2025-0092', type: 'direct',   prId: 'PR-2025-0137', supplier: 'Lenovo Group',        supId: 'SUP-LENOVO',  buyerId: 'u-proc', materialCode: 'X1 002',  amount: 61990, status: 'pending',    created: '2026-05-04', delivery: '2026-05-25', approvedBy: null,        payStatus: 'pending' },
   ],
 
   /* ── INVOICES ──────────────────────────────────────────── */
   invoices: [
-    { id: 'INV-2025-0310', poId: 'PO-2025-0098', supplier: 'TechCore Solutions Sdn Bhd',  amount: 45600, tax: 2736, total: 48336, status: 'paid',    issued: '2025-04-14', due: '2025-05-14', paid: '2025-04-28', matchStatus: 'matched'   },
-    { id: 'INV-2025-0309', poId: 'PO-2025-0096', supplier: 'QuickPrint & Packaging Co.',  amount:  5400, tax:   324, total:  5724, status: 'paid',    issued: '2025-04-02', due: '2025-04-17', paid: '2025-04-10', matchStatus: 'matched'   },
-    { id: 'INV-2025-0308', poId: 'PO-2025-0094', supplier: 'Nexgen Cloud Services Ltd',   amount:  9600, tax:   576, total: 10176, status: 'paid',    issued: '2025-03-21', due: '2025-04-05', paid: '2025-04-02', matchStatus: 'matched'   },
-    { id: 'INV-2025-0307', poId: 'PO-2025-0097', supplier: 'Nexgen Cloud Services Ltd',   amount: 18000, tax:  1080, total: 19080, status: 'pending', issued: '2025-04-15', due: '2025-05-15', paid: null,         matchStatus: 'matched'   },
-    { id: 'INV-2025-0306', poId: 'PO-2025-0095', supplier: 'Acme Logistics & Freight',   amount: 36000, tax:  2160, total: 38160, status: 'overdue', issued: '2025-03-31', due: '2025-04-15', paid: null,         matchStatus: 'mismatch'  },
-    { id: 'INV-2025-0305', poId: 'PO-2025-0093', supplier: 'PrimeMed Healthcare Supplies',amount:  4100, tax:   246, total:  4346, status: 'pending', issued: '2025-04-18', due: '2025-05-03', paid: null,         matchStatus: 'pending'   },
-    { id: 'INV-2025-0304', poId: null,            supplier: 'Vertex Industrial Equipment', amount: 12000, tax:   720, total: 12720, status: 'disputed',issued: '2025-04-10', due: '2025-04-25', paid: null,         matchStatus: 'mismatch'  },
+    { id: 'INV-2025-0310', poId: 'PO-2025-0098', supplier: 'Apple Inc.',          amount: 49990, tax: 2999, total: 52989, status: 'paid',     issued: '2026-05-14', due: '2026-06-13', paid: '2026-05-28', matchStatus: 'matched'  },
+    { id: 'INV-2025-0309', poId: 'PO-2025-0096', supplier: 'Xiaomi Corporation',  amount: 25980, tax: 1559, total: 27539, status: 'paid',     issued: '2026-05-02', due: '2026-06-01', paid: '2026-05-10', matchStatus: 'matched'  },
+    { id: 'INV-2025-0308', poId: 'PO-2025-0094', supplier: 'Apple Inc.',          amount: 32990, tax: 1979, total: 34969, status: 'paid',     issued: '2026-04-21', due: '2026-05-21', paid: '2026-05-02', matchStatus: 'matched'  },
+    { id: 'INV-2025-0307', poId: 'PO-2025-0097', supplier: 'Samsung Electronics', amount: 45990, tax: 2759, total: 48749, status: 'pending',  issued: '2026-05-15', due: '2026-06-14', paid: null,         matchStatus: 'matched'  },
+    { id: 'INV-2025-0306', poId: 'PO-2025-0095', supplier: 'Sony Corporation',    amount: 15990, tax:  959, total: 16949, status: 'overdue',  issued: '2026-04-30', due: '2026-05-15', paid: null,         matchStatus: 'mismatch' },
+    { id: 'INV-2025-0305', poId: 'PO-2025-0093', supplier: 'Apple Inc.',          amount: 18000, tax: 1080, total: 19080, status: 'pending',  issued: '2026-05-18', due: '2026-06-02', paid: null,         matchStatus: 'pending'  },
   ],
 
   /* ── PAYMENTS ──────────────────────────────────────────── */
   payments: [
-    { id: 'PAY-2025-0201', invId: 'INV-2025-0310', supplier: 'TechCore Solutions Sdn Bhd',  amount: 48336, method: 'Bank Transfer', ref: 'TT-25041-001', status: 'completed', date: '2025-04-28', processedBy: 'Priya Nair'  },
-    { id: 'PAY-2025-0200', invId: 'INV-2025-0309', supplier: 'QuickPrint & Packaging Co.',  amount:  5724, method: 'Bank Transfer', ref: 'TT-25041-002', status: 'completed', date: '2025-04-10', processedBy: 'Aisha Malik' },
-    { id: 'PAY-2025-0199', invId: 'INV-2025-0308', supplier: 'Nexgen Cloud Services Ltd',   amount: 10176, method: 'Cheque',        ref: 'CHQ-0023477',  status: 'completed', date: '2025-04-02', processedBy: 'Priya Nair'  },
-    { id: 'PAY-2025-0198', invId: 'INV-2025-0307', supplier: 'Nexgen Cloud Services Ltd',   amount: 19080, method: 'Bank Transfer', ref: 'TT-PEND-001',  status: 'scheduled', date: '2025-05-15', processedBy: 'Aisha Malik' },
-    { id: 'PAY-2025-0197', invId: 'INV-2025-0306', supplier: 'Acme Logistics & Freight',   amount: 38160, method: 'Bank Transfer', ref: 'TT-OVD-002',   status: 'overdue',   date: '2025-04-15', processedBy: 'Priya Nair'  },
-    { id: 'PAY-2025-0196', invId: 'INV-2025-0305', supplier: 'PrimeMed Healthcare Supplies',amount:  4346, method: 'Bank Transfer', ref: 'TT-PEND-002',  status: 'pending',   date: '2025-05-03', processedBy: 'Aisha Malik' },
+    { id: 'PAY-2025-0201', invId: 'INV-2025-0310', supplier: 'Apple Inc.',          amount: 52989, method: 'Bank Transfer', ref: 'TT-26051-001', status: 'completed', date: '2026-05-28', processedBy: 'Priya Nair' },
+    { id: 'PAY-2025-0200', invId: 'INV-2025-0309', supplier: 'Xiaomi Corporation',  amount: 27539, method: 'Bank Transfer', ref: 'TT-26051-002', status: 'completed', date: '2026-05-10', processedBy: 'Priya Nair' },
+    { id: 'PAY-2025-0199', invId: 'INV-2025-0308', supplier: 'Apple Inc.',          amount: 34969, method: 'Cheque',        ref: 'CHQ-0026477',  status: 'completed', date: '2026-05-02', processedBy: 'Priya Nair' },
+    { id: 'PAY-2025-0198', invId: 'INV-2025-0307', supplier: 'Samsung Electronics', amount: 48749, method: 'Bank Transfer', ref: 'TT-PEND-001',  status: 'scheduled', date: '2026-06-14', processedBy: 'Priya Nair' },
+    { id: 'PAY-2025-0197', invId: 'INV-2025-0306', supplier: 'Sony Corporation',    amount: 16949, method: 'Bank Transfer', ref: 'TT-OVD-002',   status: 'overdue',   date: '2026-05-15', processedBy: 'Priya Nair' },
   ],
 
   /* ── DASHBOARD CHARTS DATA ─────────────────────────────── */
   monthlySpend: {
-    labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'],
-    data:   [82400, 95100, 148300, 72200, 108500, 131700, 119600]
+    labels: ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'],
+    data:   [98400, 142300, 88200, 121500, 156700, 134600, 161200]
   },
 
   categorySpend: {
-    labels: ['IT Hardware', 'Cloud & SaaS', 'Logistics', 'Office Supplies', 'Equipment', 'Other'],
-    data:   [35, 22, 18, 10, 9, 6]
+    labels: ['Phones', 'Laptops', 'Tablets', 'Monitors', 'Audio', 'Accessories'],
+    data:   [34, 28, 14, 12, 8, 4]
   },
 
   poStatus: {
     labels: ['Delivered', 'Confirmed', 'In Transit', 'Pending'],
-    data:   [42, 31, 15, 12]
+    data:   [38, 27, 14, 12]
   },
 
   supplierPerformance: [
-    { name: 'Nexgen Cloud Services', score: 98, delivery: 99, quality: 98, value: 97 },
-    { name: 'TechCore Solutions',    score: 95, delivery: 94, quality: 97, value: 95 },
-    { name: 'PrimeMed Healthcare',   score: 93, delivery: 91, quality: 96, value: 93 },
-    { name: 'Vertex Industrial',     score: 91, delivery: 89, quality: 94, value: 90 },
-    { name: 'Acme Logistics',        score: 88, delivery: 85, quality: 91, value: 87 },
+    { name: 'Apple Inc.',          score: 98, delivery: 99, quality: 98, value: 96 },
+    { name: 'Samsung Electronics', score: 95, delivery: 94, quality: 97, value: 95 },
+    { name: 'Sony Corporation',    score: 93, delivery: 92, quality: 96, value: 92 },
+    { name: 'Lenovo Group',        score: 91, delivery: 90, quality: 93, value: 91 },
+    { name: 'Xiaomi Corporation',  score: 89, delivery: 87, quality: 90, value: 93 },
   ],
 
   /* ── NOTIFICATIONS ─────────────────────────────────────── */
   notifications: [
-    { id: 1, type: 'warning', title: 'Invoice Overdue',        msg: 'INV-2025-0306 is 10 days overdue',          time: '2 hours ago', read: false },
-    { id: 2, type: 'info',    title: 'New Requisition',        msg: 'PR-2025-0142 submitted by James Rivera',    time: '5 hours ago', read: false },
-    { id: 3, type: 'success', title: 'Payment Processed',      msg: 'PAY-2025-0201 of RM 48,336 completed',     time: '1 day ago',   read: true  },
-    { id: 4, type: 'danger',  title: 'Invoice Mismatch',       msg: 'INV-2025-0304 has a PO mismatch',          time: '1 day ago',   read: false },
-    { id: 5, type: 'info',    title: 'PO Delivered',           msg: 'PO-2025-0098 delivered successfully',      time: '2 days ago',  read: true  },
+    { id: 1, type: 'warning', title: 'Invoice Overdue',     msg: 'INV-2025-0306 (Sony) is overdue',            time: '2 hours ago', read: false },
+    { id: 2, type: 'info',    title: 'New Requisition',     msg: 'PR-2025-0141 submitted by James Rivera',     time: '5 hours ago', read: false },
+    { id: 3, type: 'success', title: 'Payment Processed',   msg: 'PAY-2025-0201 to Apple Inc. completed',      time: '1 day ago',   read: true  },
+    { id: 4, type: 'danger',  title: 'Invoice Mismatch',    msg: 'INV-2025-0306 (Sony) has a PO mismatch',     time: '1 day ago',   read: false },
+    { id: 5, type: 'info',    title: 'PO Delivered',        msg: 'PO-2025-0098 (Apple) delivered',             time: '2 days ago',  read: true  },
   ],
 
   /* ── APPROVAL WORKFLOWS ────────────────────────────────── */
