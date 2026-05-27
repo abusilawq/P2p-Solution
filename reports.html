@@ -19,12 +19,12 @@
           <p>Spending insights, supplier performance and procurement trends</p>
         </div>
         <div class="page-header-actions">
-          <select class="fsel" id="periodFilter" onchange="renderReports()">
+          <select class="fsel" id="periodFilter" onchange="applyPeriod()">
             <option value="ytd">Year to date</option>
-            <option value="q2">Q2 2025</option>
-            <option value="q1">Q1 2025</option>
+            <option value="m6">Last 6 months</option>
             <option value="last90">Last 90 days</option>
             <option value="last30">Last 30 days</option>
+            <option value="last7">Last 7 days</option>
           </select>
           <button class="btn btn-secondary" onclick="downloadReport('csv')">⬇ CSV</button>
           <button class="btn btn-primary" onclick="downloadReport('pdf')">📄 Download Report</button>
@@ -205,10 +205,35 @@ const allInvoices = Store.getInvoices();
 const allPOs = Store.getPOs();
 const allSuppliers = Store.getSuppliers();
 
+// Each period selects a window of recent months (+ a fraction for sub-month spans)
+const PERIODS = {
+  ytd:    { months: 7, frac: 1    },
+  m6:     { months: 6, frac: 1    },
+  last90: { months: 3, frac: 1    },
+  last30: { months: 1, frac: 1    },
+  last7:  { months: 1, frac: 0.25 },
+};
+const FULL_SPEND = P2PData.monthlySpend.data.reduce((s, v) => s + v, 0);
+
+// Period-derived state, recomputed by applyPeriod()
+let periodLabels = P2PData.monthlySpend.labels.slice();
+let periodData   = P2PData.monthlySpend.data.slice();
+let periodTotal  = FULL_SPEND;
+let periodPOs    = allPOs.length;
+
+function computePeriod() {
+  const cfg = PERIODS[document.getElementById('periodFilter').value] || PERIODS.ytd;
+  periodLabels = P2PData.monthlySpend.labels.slice(-cfg.months);
+  periodData   = P2PData.monthlySpend.data.slice(-cfg.months).map((v, i, arr) =>
+    (cfg.frac < 1 && i === arr.length - 1) ? Math.round(v * cfg.frac) : v
+  );
+  periodTotal  = periodData.reduce((s, v) => s + v, 0);
+  periodPOs    = Math.max(1, Math.round(allPOs.length * (periodTotal / FULL_SPEND)));
+}
+
 function renderKPIs() {
-  const totalSpend = allInvoices.reduce((s,i) => s + i.total, 0);
-  document.getElementById('kpiSpend').textContent = Util.formatCurrency(totalSpend).replace('RM ','RM ');
-  document.getElementById('kpiPOs').textContent = allPOs.length;
+  document.getElementById('kpiSpend').textContent = Util.formatCurrency(periodTotal);
+  document.getElementById('kpiPOs').textContent = periodPOs;
   document.getElementById('kpiCycle').textContent = '4.8';
   document.getElementById('kpiSuppliers').textContent = allSuppliers.filter(s=>s.status==='active').length;
 }
@@ -224,10 +249,10 @@ function renderCharts() {
   charts.trend = new Chart(document.getElementById('spendTrendChart'), {
     type: 'line',
     data: {
-      labels: P2PData.monthlySpend.labels,
+      labels: periodLabels,
       datasets: [{
         label: 'Spend (RM)',
-        data: P2PData.monthlySpend.data,
+        data: periodData,
         borderColor: '#2563EB',
         backgroundColor: 'rgba(37,99,235,0.1)',
         borderWidth: 2.5,
@@ -330,7 +355,7 @@ function renderCharts() {
 }
 
 function renderCategoryTable() {
-  const total = allInvoices.reduce((s, i) => s + i.total, 0) || 600000;
+  const total = periodTotal || 600000;
   const reqs = Store.getRequisitions();
   const trends = ['▲ 12%', '▲ 8%', '▼ 4%', '— stable', '▲ 5%', '▼ 2%'];
   const tcolors = ['up', 'up', 'down', '', 'up', 'down'];
@@ -385,9 +410,13 @@ function renderSupplierTable() {
   }).join('');
 }
 
-function renderReports() {
-  Toast.info('Period updated', 'Reports refreshed for selected period');
-  setTimeout(() => renderCharts(), 200);
+function applyPeriod() {
+  computePeriod();
+  renderKPIs();
+  renderCategoryTable();
+  renderCharts();
+  const label = document.getElementById('periodFilter').selectedOptions[0].textContent;
+  Toast.info('Period updated', `Showing data for: ${label}`);
 }
 
 function downloadReport(format) {
@@ -442,6 +471,7 @@ function downloadReport(format) {
   }
 }
 
+computePeriod();
 renderKPIs();
 renderCategoryTable();
 renderSupplierTable();
