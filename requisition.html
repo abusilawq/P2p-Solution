@@ -352,8 +352,13 @@ function viewDetail(id) {
       <div><div class="form-label">Created</div>${Util.formatDate(r.created)}</div>
       <div><div class="form-label">Approved By</div>${r.approvedBy || '—'}</div>
     </div>
-    <div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:6px;">
-      <div class="form-label">Line Items: ${r.items} items</div>
+    <div style="margin-top:12px">
+      <div class="form-label">Line Items (${(r.lineItems && r.lineItems.length) || r.items || 0})</div>
+      ${(r.lineItems && r.lineItems.length) ? `
+        <div class="table-container" style="border:1px solid var(--border);border-radius:8px;margin-top:4px">
+          <table><thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+          <tbody>${r.lineItems.map(li => `<tr><td class="td-primary">${li.name}</td><td>${li.qty}</td><td>${Util.formatCurrency(li.price)}</td><td>${Util.formatCurrency(li.total)}</td></tr>`).join('')}</tbody></table>
+        </div>` : `<div style="padding:12px;background:var(--bg);border-radius:6px;color:var(--text-muted);font-size:0.8rem">${r.items || 0} item(s) — line details not recorded for this requisition.</div>`}
     </div>`;
   document.getElementById('detailActions').innerHTML = r.status === 'pending' ? `
     <button class="btn btn-danger btn-sm" onclick="changeStatus('${r.id}','rejected');Modal.close('detailModal')">Reject</button>
@@ -515,9 +520,19 @@ function buildReview() {
     </div>`;
 }
 
+function collectLineItems() {
+  return [...document.querySelectorAll('.line-item-row')].map(row => ({
+    name:  row.querySelector('.item-desc').value || '—',
+    qty:   parseFloat(row.querySelector('.item-qty').value) || 0,
+    price: parseFloat(row.querySelector('.item-price').value) || 0,
+    total: parseFloat(row.querySelector('.item-total').value) || 0,
+  })).filter(li => li.name !== '—' || li.total > 0);
+}
+
 function submitReq() {
   const reqs = Store.getRequisitions();
   const user = Store.getUser();
+  const lineItems = collectLineItems();
   const newReq = {
     id:         'PR-2025-' + String(reqs.length + 200).padStart(4,'0'),
     type:       document.getElementById('reqType').value,
@@ -530,7 +545,8 @@ function submitReq() {
     category:   document.getElementById('reqCategory').value,
     created:    Util.today(),
     approvedBy: null,
-    items:      document.querySelectorAll('.line-item-row').length,
+    lineItems,
+    items:      lineItems.length || document.querySelectorAll('.line-item-row').length,
   };
   reqs.unshift(newReq);
   Store.saveRequisitions(reqs);

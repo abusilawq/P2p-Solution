@@ -23,6 +23,13 @@
             <span class="si">🔍</span>
             <input class="form-control" id="shopSearch" placeholder="Search products…" oninput="renderShop()"/>
           </div>
+          <select class="fsel" id="shopSort" onchange="renderShop()">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low → High</option>
+            <option value="price-desc">Price: High → Low</option>
+            <option value="name">Name A–Z</option>
+            <option value="stock">Most in stock</option>
+          </select>
         </div>
       </div>
 
@@ -77,10 +84,15 @@ function imgTag(p) { return p.image ? `<img src="${p.image}" alt="${p.name}" loa
 
 function renderShop() {
   const q = (document.getElementById('shopSearch').value || '').toLowerCase();
+  const sort = document.getElementById('shopSort').value;
   const list = products.filter(p =>
     (activeCat === 'All' || p.category === activeCat) &&
     (p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q))
   );
+  if (sort === 'price-asc')  list.sort((a, b) => a.price - b.price);
+  if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+  if (sort === 'name')       list.sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === 'stock')      list.sort((a, b) => stockOf(b) - stockOf(a));
   const grid = document.getElementById('shopGrid');
   if (!list.length) {
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🛍️</div><h4>No products found</h4><p>Try a different category or search term.</p></div>`;
@@ -90,7 +102,7 @@ function renderShop() {
     const n = stockOf(p);
     return `
     <div class="product-card" onclick="openProduct('${p.id}')">
-      <div class="product-img">${imgTag(p)}</div>
+      <div class="product-img"><span class="brand-chip">${p.brand}</span>${imgTag(p)}</div>
       <div class="product-info">
         <div class="product-brand">${p.brand}</div>
         <div class="product-name">${p.name}</div>
@@ -123,6 +135,9 @@ function openProduct(id) {
     </div>`;
   document.getElementById('pmFooter').innerHTML = `
     <button class="btn btn-secondary" onclick="Modal.close('productModal')">Close</button>
+    <label style="display:${n === 0 ? 'none' : 'flex'};align-items:center;gap:6px;font-size:0.78rem;color:var(--text-secondary)">
+      Qty <input type="number" id="pmQty" value="1" min="1" max="${n}" class="form-control" style="width:72px;padding:6px 8px"/>
+    </label>
     <button class="btn btn-primary" ${n === 0 ? 'disabled' : ''} onclick="raisePO('${p.id}')">🧾 Raise Purchase Order</button>`;
   Modal.open('productModal');
 }
@@ -130,11 +145,17 @@ function openProduct(id) {
 function raisePO(id) {
   const all = Store.getProducts();
   const p = all.find(x => x.id === id);
-  const unit = p && p.units.find(u => u.status === 'in_stock');
-  if (!unit) { Toast.warning('Out of stock', 'This product has no available units.'); return; }
-  unit.status = 'sold';
+  const available = p ? p.units.filter(u => u.status === 'in_stock') : [];
+  if (!available.length) { Toast.warning('Out of stock', 'This product has no available units.'); return; }
+
+  const qtyInput = parseInt((document.getElementById('pmQty') || {}).value) || 1;
+  const qty = Math.max(1, Math.min(qtyInput, available.length));
+  const taken = available.slice(0, qty);
+  taken.forEach(u => u.status = 'sold');
   Store.saveProducts(all);
 
+  const codes = taken.map(u => u.code);
+  const total = p.price * qty;
   const user = Store.getUser();
   const seller = P2PData.users.find(u => u.id === p.sellerId);
   const sup = P2PData.suppliers.find(s => s.userId === p.sellerId);
@@ -148,7 +169,7 @@ function raisePO(id) {
     id: 'ORD-' + stamp,
     type: 'direct', buyerId: user.id, supplierId: supId,
     productId: p.id, productName: p.name,
-    code: unit.code, qty: 1, price: p.price, total: p.price,
+    code: codes.join(', '), qty, price: p.price, total,
     status: 'confirmed', date: Util.today(),
   });
   Store.saveOrders(orders);
@@ -158,15 +179,15 @@ function raisePO(id) {
   pos.unshift({
     id: 'PO-' + stamp,
     type: 'direct', prId: null, supplier: supName, supId,
-    buyerId: user.id, materialCode: unit.code, productId: p.id,
-    amount: p.price, status: 'confirmed', created: Util.today(),
+    buyerId: user.id, materialCode: codes.join(', '), productId: p.id,
+    amount: total, status: 'confirmed', created: Util.today(),
     delivery: Util.addDays(Util.today(), 7), approvedBy: user.name, payStatus: 'pending',
   });
   Store.savePOs(pos);
 
   products = all;
   Modal.close('productModal');
-  Toast.success('Purchase Order raised', `Direct PO for ${p.name} (${unit.code}) — ${Util.formatCurrency(p.price)} sent to ${supName}.`);
+  Toast.success('Purchase Order raised', `Direct PO for ${qty}× ${p.name} — ${Util.formatCurrency(total)} sent to ${supName}.`);
   renderShop();
 }
 </script>

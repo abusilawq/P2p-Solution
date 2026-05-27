@@ -123,7 +123,7 @@ function renderCatalog() {
     const n = stockOf(p);
     return `
     <div class="product-card" onclick="preview('${p.id}')">
-      <div class="product-img">${imgTag(p)}</div>
+      <div class="product-img"><span class="brand-chip">${p.brand}</span>${imgTag(p)}</div>
       <div class="product-info">
         <div class="product-brand">${p.brand}</div>
         <div class="product-name">${p.name}</div>
