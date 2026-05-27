@@ -110,7 +110,7 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Linked PO</label>
-            <select class="form-control" id="invPO">
+            <select class="form-control" id="invPO" onchange="onPOSelect()">
               <option value="">None (standalone)</option>
             </select>
           </div>
@@ -284,6 +284,18 @@ function populateDropdowns() {
   Store.getSuppliers().filter(s=>s.status==='active').forEach(s => {
     const opt=document.createElement('option'); opt.value=s.id; opt.textContent=s.name; supSel.appendChild(opt);
   });
+}
+
+// Linking a PO auto-fills the supplier + amount so they can't drift apart
+function onPOSelect() {
+  const poId = document.getElementById('invPO').value;
+  if (!poId) return;
+  const po = Store.getPOs().find(p => p.id === poId);
+  if (!po) return;
+  const sup = Store.getSuppliers().find(s => s.id === po.supId);
+  if (sup) document.getElementById('invSupplier').value = sup.id;
+  document.getElementById('invAmount').value = po.amount;
+  calcTax();
 }
 
 function saveInvoice() {

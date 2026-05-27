@@ -330,14 +330,18 @@ function renderCharts() {
 }
 
 function renderCategoryTable() {
-  const rows = [
-    { cat: 'IT Hardware',     orders: 18, spend: 215400, pct: 35, trend: '▲ 12%', tcolor: 'up' },
-    { cat: 'Cloud & SaaS',    orders: 12, spend: 132000, pct: 22, trend: '▲ 18%', tcolor: 'up' },
-    { cat: 'Logistics',       orders: 22, spend:  108000, pct: 18, trend: '▼ 4%',  tcolor: 'down' },
-    { cat: 'Office Supplies', orders: 34, spend:   58200, pct: 10, trend: '— stable', tcolor: '' },
-    { cat: 'Equipment',       orders:  7, spend:   53400, pct:  9, trend: '▲ 5%',  tcolor: 'up' },
-    { cat: 'Other',           orders: 11, spend:   35900, pct:  6, trend: '▼ 2%',  tcolor: 'down' },
-  ];
+  const total = allInvoices.reduce((s, i) => s + i.total, 0) || 600000;
+  const reqs = Store.getRequisitions();
+  const trends = ['▲ 12%', '▲ 8%', '▼ 4%', '— stable', '▲ 5%', '▼ 2%'];
+  const tcolors = ['up', 'up', 'down', '', 'up', 'down'];
+  const rows = P2PData.categorySpend.labels.map((cat, i) => ({
+    cat,
+    pct: P2PData.categorySpend.data[i],
+    spend: Math.round(total * P2PData.categorySpend.data[i] / 100),
+    orders: reqs.filter(r => r.category === cat).length || Math.max(2, Math.round(P2PData.categorySpend.data[i] / 4)),
+    trend: trends[i % trends.length],
+    tcolor: tcolors[i % tcolors.length],
+  }));
   document.getElementById('categoryTbody').innerHTML = rows.map(r => `
     <tr>
       <td class="td-primary">${r.cat}</td>

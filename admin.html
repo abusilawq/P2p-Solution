@@ -378,11 +378,11 @@ function renderAudit() {
     { time: '2 min ago',  user: 'Sarah Chen',   action: 'Approved Requisition',    obj: 'PR-2025-0142', ip: '192.168.1.45',  result: 'success' },
     { time: '15 min ago', user: 'Priya Nair',   action: 'Processed Payment',       obj: 'PAY-2025-0201',ip: '192.168.1.62',  result: 'success' },
     { time: '1 hr ago',   user: 'James Rivera', action: 'Created Purchase Order',  obj: 'PO-2025-0098', ip: '192.168.1.78',  result: 'success' },
-    { time: '2 hr ago',   user: 'Sarah Chen',   action: 'Updated User Permission', obj: 'u002',         ip: '192.168.1.45',  result: 'success' },
-    { time: '3 hr ago',   user: 'Aisha Malik',  action: 'Logged In',               obj: 'Auth Session', ip: '192.168.1.91',  result: 'success' },
-    { time: '5 hr ago',   user: 'Tom Bradley',  action: 'Login Attempt',           obj: 'Auth Session', ip: '203.45.12.88',  result: 'failed'  },
-    { time: '6 hr ago',   user: 'Priya Nair',   action: 'Rejected Requisition',    obj: 'PR-2025-0139', ip: '192.168.1.62',  result: 'success' },
-    { time: '8 hr ago',   user: 'Sarah Chen',   action: 'Added New Supplier',      obj: 'SUP-007',      ip: '192.168.1.45',  result: 'success' },
+    { time: '2 hr ago',   user: 'Sarah Chen',   action: 'Updated User Permission', obj: 'u-proc',       ip: '192.168.1.45',  result: 'success' },
+    { time: '3 hr ago',   user: 'Apple Store',  action: 'Logged In',               obj: 'Auth Session', ip: '17.253.144.10', result: 'success' },
+    { time: '5 hr ago',   user: 'Unknown',      action: 'Login Attempt',           obj: 'Auth Session', ip: '203.45.12.88',  result: 'failed'  },
+    { time: '6 hr ago',   user: 'Sarah Chen',   action: 'Rejected Requisition',    obj: 'PR-2025-0139', ip: '192.168.1.45',  result: 'success' },
+    { time: '8 hr ago',   user: 'Sarah Chen',   action: 'Added New Supplier',      obj: 'SUP-SONY',     ip: '192.168.1.45',  result: 'success' },
     { time: '1 day ago',  user: 'James Rivera', action: 'Generated Report',        obj: 'Q1-Spend',     ip: '192.168.1.78',  result: 'success' },
   ];
   document.getElementById('auditTbody').innerHTML = logs.map(l => `

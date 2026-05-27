@@ -906,6 +906,18 @@ select.form-control { cursor: pointer; }
   .inv-layout { grid-template-columns: 1fr; }
 }
 
+/* Brand chip on product cards */
+.product-img { position: relative; }
+.brand-chip {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(255,255,255,0.94); color: var(--text-primary);
+  font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 3px 9px; border-radius: 999px; box-shadow: var(--shadow-sm);
+}
+.product-card .product-name {
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+}
+
 /* ─── PUBLIC LANDING PAGE ─────────────────────────────────── */
 .lp-nav {
   display: flex; align-items: center; justify-content: space-between;
